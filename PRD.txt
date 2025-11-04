@@ -1,0 +1,412 @@
+Product Requirements Document (PRD)
+
+## Project Name
+
+**Ghostmate.online** — A progressive web platform for anonymous, time-limited, and emotionally engaging conversations.
+
+---
+
+## 1. Vision
+
+Ghostmate.online is a privacy-first communication platform that allows people to connect anonymously through fleeting, meaningful exchanges. Every interaction resets daily to encourage spontaneity and emotional honesty without lasting digital footprints. The system is designed for curiosity, connection, and mystery — all while maintaining strong user privacy and smooth technical performance.
+
+---
+
+## 2. Core Concept
+
+Upon login by google, the users will be assigned a unique 8-digit numeric IDs for a day.
+
+At **12:00 AM (server time)**, all chat data, messages, and IDs are deleted. Users must rebuild their connections daily by re-favoriting their partners, keeping streaks alive through mutual effort. The platform balances anonymity with accountability through limited interaction rules and connection tokens.
+
+---
+
+## 3. Functional Overview
+
+### 3.1 User Flow
+
+1. **Google Sign-In (Mandatory)**
+    - All users must log in with Google.
+    - Show a clear privacy notice:*“Your Google account is only used for verification and to maintain your connections. Your personal data will never be shared or displayed.”*  Message can be tweaked a bit focusing on letting users know that their data will always be private.
+2. **ID Generation**
+    - Each logged-in user is assigned a new **8 digit numeric ID** every day at midnight.
+    - IDs are unique for the day and expire automatically at 12:00 AM.
+3. **Messaging Rules**
+    - Users can initiate up to **5 new chats per day** (with 5 unique IDs).
+    - Once a conversation starts, both users can exchange messages until midnight.
+    - All messages and chat histories are auto-deleted at reset time.
+4. **Favorites and Connections**
+    - Users can mark others as “Favorites.”
+    - If both users favorite each other:
+        - A **connection token** is generated.
+        - The next day, that connection appears under **“Connections You Made.”**
+        - The streak count increases by 1.
+    - Mutual favorites **cannot be unfavorited** until the next day.
+    - If both fail to re-favorite on the next day, the streak resets to 0 and they lose track of each other.
+5. **Streaks**
+    - Each mutual connection’s streak is tracked daily.
+    - Streak count is displayed beside the connection under “Connections You Made.”
+6. **Highlights and Stories**
+    - Users can highlight messages they find meaningful.
+    - If both users highlight the same message, it’s queued for **admin review.**
+    - Approved highlights appear as anonymous “**Stories**” on a global feed for 24 hours.
+7. **Random Connect**
+    - Users can use “Random Connect” to instantly pair with a random active ID and start chatting.
+    - Each random match also counts toward the daily limit of 5 conversations.
+
+---
+
+## 4. Core Components
+
+| Component | Description |
+| --- | --- |
+| **Authentication** | Google Sign-In via Firebase. |
+| **Anonymous ID System** | Daily-generated, unique numeric IDs tied to Firebase Auth UID. |
+| **Chat Module** | Real-time chats with message expiry at midnight. |
+| **Favorites & Tokens** | Handles mutual favorite tracking, connection tokens, and streak calculations. |
+| **Stories Module** | Displays admin-approved, mutual highlights for 24 hours. |
+| **Daily Reset Function** | Serverless cron function to reset IDs, delete messages, and update streaks daily. |
+| **UI Layer** | Custom-designed dark theme emphasizing mystery, minimalism, and readability. |
+| **PWA Setup** | Fast, installable web app with offline caching and mobile optimization. |
+
+---
+
+## 5. Rules & Constraints
+
+- **Daily Message Limit:** 5 unique chats per user.
+- **Chat Expiry:** All conversations are deleted at midnight daily.
+- **Favorites:** Mutual favorites are locked for 24 hours and must be renewed daily to maintain streaks.
+- **Data Retention:** No permanent chat logs; only connection tokens and streaks are stored.
+- **Random Connect:** Counts toward the daily limit.
+- **Admin Control:** All stories require admin approval before public display.
+- **Daily Reset:** Fully automated and triggers at server-side midnight.
+
+---
+
+## 6. Design & UX Direction
+
+- **Mode:** Permanent dark mode (single mode) — polished and visually consistent with the brand name *Ghostmate*.
+- **Color Palette:** Deep charcoal background, muted blues/purples, and soft accent glows for active states.
+- **Typography:** Rounded sans-serif (e.g., Inter, Nunito Sans) for clarity and warmth.
+- **Visual Style:** Abstract gradients, ghost-like fade animations, floating message bubbles.
+- **Layout:** Simple, clean, mobile-first PWA experience.
+- **Accessibility:** Font scaling, proper contrast, and ARIA support.
+- **Brand Personality:** Anonymous, calming, emotionally neutral — avoiding any sense of risk or exposure.
+
+---
+
+## 7. Tech Stack
+
+### 7.1 Frontend
+
+- **Framework:** Next.js (for SSR and SEO benefits)
+- **Styling:** Vanilla CSS (no Tailwind)
+- **State Management:** React Context or Zustand
+- **PWA Setup:** next-pwa or custom service worker
+- **Animations:** CSS keyframes and transitions only
+- **SEO Tools:** Next SEO package + structured meta tags + Open Graph data
+
+### 7.2 Backend
+
+- **Authentication:** Firebase Auth (Google Sign-In)
+- **Database:** Firebase Firestore (for user data, favorites, tokens, and streaks)
+- **Messaging:** Firebase Realtime Database (lightweight and fast for chat)
+- **Serverless Functions:** Firebase Cloud Functions (for daily resets, cleanup, and streak updates)
+- **Storage:** Firebase Storage (for stories if media or image versions are added later)
+- **Admin Panel:** Firestore-based admin access with secure rules
+
+### 7.3 Deployment
+
+- **Hosting:** Vercel (frontend)
+- **Backend:** Firebase Functions and Hosting
+- **Domain:** [ghostmate.online](https://ghostmate.online/)
+- **Analytics:** Firebase Analytics + Google Search Console
+
+---
+
+## 8. SEO Optimization Plan
+
+1. **Server-Side Rendering (Next.js):** Ensures indexable metadata and fast initial page load.
+2. **Semantic HTML:** Proper heading hierarchy, accessible ARIA roles, and descriptive titles.
+3. **Meta Tags:**
+    - Title: *Ghostmate — Anonymous Conversations, Real Connections*
+    - Description: *Connect anonymously, chat freely, and disappear daily. Ghostmate keeps your identity safe while you explore genuine human connections.*
+4. **Open Graph / Twitter Cards:** For social link previews.
+5. **Sitemap & Robots.txt:** Auto-generated and submitted to Google.
+6. **Page Speed Optimization:** Lazy-loading images, caching with PWA, and minimal third-party scripts.
+7. **Structured Data (JSON-LD):** Defines website type and features for better crawl ranking.
+8. **Keywords Focus:** anonymous chat, daily ID chat, secure conversations, anonymous messaging, ghostmate.
+
+---
+
+## 9. Security & Privacy
+
+- Strict Firebase security rules for reads/writes.
+- No public exposure of Google account info or real user data.
+- Messages are encrypted in transit (HTTPS).
+- Message data purged daily by automated cron.
+- Minimal data retention ensures full privacy compliance.
+- Content moderation limited to admin-approved stories.
+
+---
+
+## 10. Scalability Plan
+
+| Phase | Goal | Infrastructure |
+| --- | --- | --- |
+| **Phase 1 (MVP)** | Up to 500 active users | Firebase Free Tier |
+| **Phase 2** | Up to 5,000 users | Upgrade to Blaze Plan, increase Cloud Function capacity |
+| **Phase 3** | 10k+ users | Move chat to dedicated socket server (Node.js + Redis) if needed |
+| **Phase 4** | Revenue scaling | Integrate AdSense or premium features |
+
+---
+
+## 11. Edge Cases & Handling
+
+| Edge Case | Handling |
+| --- | --- |
+| Both users un-favorite each other before midnight | No connection token is generated. |
+| One user favorites but the other does not | Favorite data discarded after reset. |
+| User exceeds 5 daily chats | Disable chat initiation button with countdown to reset. |
+| Server delay in reset | Introduce safety buffer of 2–3 minutes and server timestamp check. |
+| Missed re-favorite | Streak reset to 0 with soft prompt: “You lost the streak, try again tomorrow.” |
+| Unauthorized data access attempt | Firebase rules block read/write unless authenticated and verified. |
+
+---
+
+## 12. Success Metrics
+
+- **Daily Active Users (DAU)**
+- **Average Conversations per User per Day**
+- **Mutual Favorite Rate (%)**
+- **Streak Retention Rate**
+- **Story Highlights per Day**
+- **Load Time (TTFB < 1.5s)**
+- **Bounce Rate (%)**
+- **Indexed Pages on Google Search Console**
+
+---
+
+## 13. Project Goals
+
+1. Build and deploy a stable, anonymous PWA MVP in **ASAP**.
+2. Maintain minimal user setup and maximum privacy.
+3. Achieve SEO score of **90+ (Lighthouse)**
+4. Create a distinctive, safe, and emotionally resonant experience.
+5. Prepare infrastructure for seamless scaling to thousands of users.
+
+---
+
+**Prepared for Development with AI Agents (GitHub Copilot, Cursor, Claude, etc.)**
+
+All functional, design, and technical requirements have been detailed to ensure autonomous or team-based execution from MVP to scaling phase.
+
+---
+
+# Product Requirements Document (PRD)
+
+## Project Name
+
+**Ghostmate.online** — A progressive web platform for anonymous, time-limited, and emotionally engaging conversations.
+
+---
+
+## 1. Vision
+
+Ghostmate.online is a privacy-first communication platform that allows people to connect anonymously through fleeting, meaningful exchanges. Every interaction resets daily to encourage spontaneity and emotional honesty without lasting digital footprints. The system is designed for curiosity, connection, and mystery — all while maintaining strong user privacy and smooth technical performance.
+
+---
+
+## 2. Core Concept
+
+Each user is assigned a **unique 8–10 digit ID** tied to their Google account but never publicly displayed.
+
+At **12:00 AM (server time)**, all chat data, messages, and IDs are deleted. Users must rebuild their connections daily by re-favoriting their partners, keeping streaks alive through mutual effort. The platform balances anonymity with accountability through limited interaction rules and connection tokens.
+
+---
+
+## 3. Functional Overview
+
+### 3.1 User Flow
+
+1. **Google Sign-In (Mandatory)**
+    - All users must log in with Google.
+    - Show a clear privacy notice:*“Your Google account is only used for verification and to maintain your connections. Your personal data will never be shared or displayed.”*
+2. **ID Generation**
+    - Each logged-in user is assigned a new **8–10 digit ID** every day at midnight.
+    - IDs are unique for the day and expire automatically at 12:00 AM.
+3. **Messaging Rules**
+    - Users can initiate up to **5 new chats per day** (with 5 unique IDs).
+    - Once a conversation starts, both users can exchange messages until midnight.
+    - All messages and chat histories are auto-deleted at reset time.
+4. **Favorites and Connections**
+    - Users can mark others as “Favorites.”
+    - If both users favorite each other:
+        - A **connection token** is generated.
+        - The next day, that connection appears under **“Connections You Made.”**
+        - The streak count increases by 1.
+    - Mutual favorites **cannot be unfavorited** until the next day.
+    - If both fail to re-favorite on the next day, the streak resets to 0.
+5. **Streaks**
+    - Each mutual connection’s streak is tracked daily.
+    - Streak count is displayed beside the connection under “Connections You Made.”
+6. **Highlights and Stories**
+    - Users can highlight messages they find meaningful.
+    - If both users highlight the same message, it’s queued for **admin review.**
+    - Approved highlights appear as anonymous “**Stories**” on a global feed for 24 hours.
+7. **Random Connect**
+    - Users can use “Random Connect” to instantly pair with a random active ID and start chatting.
+    - Each random match also counts toward the daily limit of 5 conversations.
+
+---
+
+## 4. Core Components
+
+| Component | Description |
+| --- | --- |
+| **Authentication** | Google Sign-In via Firebase. |
+| **Anonymous ID System** | Daily-generated, unique numeric IDs tied to Firebase Auth UID. |
+| **Chat Module** | Real-time chats with message expiry at midnight. |
+| **Favorites & Tokens** | Handles mutual favorite tracking, connection tokens, and streak calculations. |
+| **Stories Module** | Displays admin-approved, mutual highlights for 24 hours. |
+| **Daily Reset Function** | Serverless cron function to reset IDs, delete messages, and update streaks daily. |
+| **UI Layer** | Custom-designed dark theme emphasizing mystery, minimalism, and readability. |
+| **PWA Setup** | Fast, installable web app with offline caching and mobile optimization. |
+
+---
+
+## 5. Rules & Constraints
+
+- **Daily Message Limit:** 5 unique chats per user.
+- **Chat Expiry:** All conversations are deleted at midnight daily.
+- **Favorites:** Mutual favorites are locked for 24 hours and must be renewed daily to maintain streaks.
+- **Data Retention:** No permanent chat logs; only connection tokens and streaks are stored.
+- **Random Connect:** Counts toward the daily limit.
+- **Admin Control:** All stories require admin approval before public display.
+- **Daily Reset:** Fully automated and triggers at server-side midnight.
+
+---
+
+## 6. Design & UX Direction
+
+- **Mode:** Permanent dark mode — polished and visually consistent with the brand name *Ghostmate*.
+- **Color Palette:** Deep charcoal background, muted blues/purples, and soft accent glows for active states.
+- **Typography:** Rounded sans-serif (e.g., Inter, Nunito Sans) for clarity and warmth.
+- **Visual Style:** Abstract gradients, ghost-like fade animations, floating message bubbles.
+- **Layout:** Simple, clean, mobile-first PWA experience.
+- **Accessibility:** Font scaling, proper contrast, and ARIA support.
+- **Brand Personality:** Anonymous, calming, emotionally neutral — avoiding any sense of risk or exposure.
+
+---
+
+## 7. Tech Stack
+
+### 7.1 Frontend
+
+- **Framework:** Next.js (for SSR and SEO benefits)
+- **Styling:** Vanilla CSS (no Tailwind)
+- **State Management:** React Context or Zustand
+- **PWA Setup:** next-pwa or custom service worker
+- **Animations:** CSS keyframes and transitions only
+- **SEO Tools:** Next SEO package + structured meta tags + Open Graph data
+
+### 7.2 Backend
+
+- **Authentication:** Firebase Auth (Google Sign-In)
+- **Database:** Firebase Firestore (for user data, favorites, tokens, and streaks)
+- **Messaging:** Firebase Realtime Database (lightweight and fast for chat)
+- **Serverless Functions:** Firebase Cloud Functions (for daily resets, cleanup, and streak updates)
+- **Storage:** Firebase Storage (for stories if media or image versions are added later)
+- **Admin Panel:** Firestore-based admin access with secure rules
+
+### 7.3 Deployment
+
+- **Hosting:** Vercel (frontend)
+- **Backend:** Firebase Functions and Hosting
+- **Domain:** [ghostmate.online](https://ghostmate.online/)
+- **Analytics:** Firebase Analytics + Google Search Console
+
+---
+
+## 8. SEO Optimization Plan
+
+1. **Server-Side Rendering (Next.js):** Ensures indexable metadata and fast initial page load.
+2. **Semantic HTML:** Proper heading hierarchy, accessible ARIA roles, and descriptive titles.
+3. **Meta Tags:**
+    - Title: *Ghostmate — Anonymous Conversations, Real Connections*
+    - Description: *Connect anonymously, chat freely, and disappear daily. Ghostmate keeps your identity safe while you explore genuine human connections.*
+4. **Open Graph / Twitter Cards:** For social link previews.
+5. **Sitemap & Robots.txt:** Auto-generated and submitted to Google.
+6. **Page Speed Optimization:** Lazy-loading images, caching with PWA, and minimal third-party scripts.
+7. **Structured Data (JSON-LD):** Defines website type and features for better crawl ranking.
+8. **Keywords Focus:** anonymous chat, daily ID chat, secure conversations, anonymous messaging, ghostmate.
+
+---
+
+## 9. Security & Privacy
+
+- Strict Firebase security rules for reads/writes.
+- No public exposure of Google account info or real user data.
+- Messages are encrypted in transit (HTTPS).
+- Message data purged daily by automated cron.
+- Minimal data retention ensures full privacy compliance.
+- Content moderation limited to admin-approved stories.
+
+---
+
+## 10. Scalability Plan
+
+| Phase | Goal | Infrastructure |
+| --- | --- | --- |
+| **Phase 1 (MVP)** | Up to 500 active users | Firebase Free Tier |
+| **Phase 2** | Up to 5,000 users | Upgrade to Blaze Plan, increase Cloud Function capacity |
+| **Phase 3** | 10k+ users | Move chat to dedicated socket server (Node.js + Redis) if needed |
+| **Phase 4** | Revenue scaling | Integrate AdSense or premium features |
+
+---
+
+## 11. Future Enhancements
+
+- User badges for long streaks (GhostFlame, Whisperer, etc.).
+- Anonymous community Q&A (“Ask the Void” concept).
+- AI-driven moderation for harmful content.
+- Advanced filtering in Random Connect (age range, interests, country).
+- Temporary profile customization (anonymous display avatars).
+- Nightly “Whispers” — short prompts for conversation starters.
+
+---
+
+## 12. Edge Cases & Handling
+
+| Edge Case | Handling |
+| --- | --- |
+| Both users un-favorite each other before midnight | No connection token is generated. |
+| One user favorites but the other does not | Favorite data discarded after reset. |
+| User exceeds 5 daily chats | Disable chat initiation button with countdown to reset. |
+| Server delay in reset | Introduce safety buffer of 2–3 minutes and server timestamp check. |
+| Missed re-favorite | Streak reset to 0 with soft prompt: “You lost the streak, try again tomorrow.” |
+| Unauthorized data access attempt | Firebase rules block read/write unless authenticated and verified. |
+
+---
+
+## 13. Success Metrics
+
+- **Daily Active Users (DAU)**
+- **Average Conversations per User per Day**
+- **Mutual Favorite Rate (%)**
+- **Streak Retention Rate**
+- **Story Highlights per Day**
+- **Load Time (TTFB < 1.5s)**
+- **Bounce Rate (%)**
+- **Indexed Pages on Google Search Console**
+
+---
+
+## 14. Project Goals
+
+1. Build and deploy a stable, anonymous PWA MVP in **6–8 weeks**.
+2. Maintain minimal user setup and maximum privacy.
+3. Achieve SEO score of **90+ (Lighthouse)**.
+4. Create a distinctive, safe, and emotionally resonant experience.
+5. Prepare infrastructure for seamless scaling to thousands of users.
+
+---
