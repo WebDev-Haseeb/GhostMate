@@ -1,0 +1,12 @@
+# GhostMate Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://ghostmate.online/sitemap.xml
+
+# Disallow service worker and PWA files
+Disallow: /sw.js
+Disallow: /workbox-*.js
+Disallow: /worker-*.js
+

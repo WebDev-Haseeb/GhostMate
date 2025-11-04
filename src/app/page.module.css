@@ -1,0 +1,58 @@
+/* GhostMate Homepage Styles */
+.page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-xl);
+  max-width: 600px;
+  width: 100%;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.intro h1 {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ghostFade 3s ease-in-out infinite;
+}
+
+.intro p {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  color: var(--foreground-secondary);
+}
+
+.tagline {
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  color: var(--foreground-tertiary);
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: var(--space-md);
+  }
+  
+  .main {
+    gap: var(--space-lg);
+  }
+}
