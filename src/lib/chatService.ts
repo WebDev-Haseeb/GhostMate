@@ -79,6 +79,39 @@ export async function sendMessage(
 }
 
 /**
+ * Send a system message (notification) in a chat
+ * Used for favorites, connection notifications, etc.
+ */
+export async function sendSystemMessage(
+  chatId: string,
+  text: string
+): Promise<void> {
+  // Create system message object
+  const systemMessage: Omit<Message, 'id'> = {
+    senderId: 'system',
+    recipientId: 'system',
+    text,
+    timestamp: Date.now(),
+    read: false,
+    isSystemMessage: true
+  };
+  
+  // Push message to database
+  const messagesRef = ref(database, `chats/${chatId}/messages`);
+  const newMessageRef = push(messagesRef);
+  
+  await set(newMessageRef, systemMessage);
+  
+  // Update chat metadata
+  const chatRef = ref(database, `chats/${chatId}`);
+  await update(chatRef, {
+    lastMessage: text.substring(0, 100),
+    lastMessageTimestamp: Date.now(),
+    updatedAt: Date.now()
+  });
+}
+
+/**
  * Listen for new messages in a chat
  * Returns unsubscribe function
  * 

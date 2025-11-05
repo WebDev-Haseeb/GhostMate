@@ -162,3 +162,30 @@ export async function refreshDailyId(userId: string): Promise<string> {
   }
 }
 
+/**
+ * Get user ID from daily ID (reverse lookup)
+ * Essential for mutual favorite detection
+ */
+export async function getUserIdFromDailyId(dailyId: string): Promise<string | null> {
+  try {
+    const dailyIdDocRef = doc(db, 'dailyIds', dailyId);
+    const dailyIdDoc = await getDoc(dailyIdDocRef);
+    
+    if (!dailyIdDoc.exists()) {
+      return null;
+    }
+    
+    const data = dailyIdDoc.data();
+    
+    // Check if the ID is still valid (not expired)
+    if (data.expiresAt && data.expiresAt.toDate() < getTodayMidnight()) {
+      return null; // Expired
+    }
+    
+    return data.userId || null;
+  } catch (error) {
+    console.error('Error getting user ID from daily ID:', error);
+    return null;
+  }
+}
+

@@ -1,0 +1,112 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.favoriteButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.favoriteButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.favoriteButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.favoriteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.favoriteButton.favorited {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.1));
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.favoriteButton.mutual {
+  background: linear-gradient(135deg, rgba(0, 255, 127, 0.2), rgba(50, 205, 50, 0.1));
+  border-color: rgba(0, 255, 127, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.favoriteButton.locked {
+  background: linear-gradient(135deg, rgba(255, 100, 100, 0.2), rgba(255, 50, 50, 0.1));
+  border-color: rgba(255, 100, 100, 0.4);
+}
+
+.icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lockLabel {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.error {
+  font-size: 0.875rem;
+  color: #ff6b6b;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  max-width: 300px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(0, 255, 127, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 127, 0.6);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .favoriteButton {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .icon {
+    font-size: 1.125rem;
+  }
+
+  .label {
+    font-size: 0.75rem;
+  }
+
+  .lockLabel {
+    font-size: 0.625rem;
+  }
+}
+

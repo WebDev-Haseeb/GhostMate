@@ -87,3 +87,15 @@ export function getTimeUntilMidnight(): {
   
   return { hours, minutes, seconds, totalMs };
 }
+
+/**
+ * Get today's date string in PKT timezone (YYYY-MM-DD format)
+ */
+export function getTodayDateString(): string {
+  const pktTime = getPakistanTime();
+  const year = pktTime.getFullYear();
+  const month = String(pktTime.getMonth() + 1).padStart(2, '0');
+  const day = String(pktTime.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+}

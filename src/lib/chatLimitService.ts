@@ -159,6 +159,11 @@ export async function incrementChatCount(userId: string): Promise<{
  * Check if user can initiate a new chat (without incrementing)
  */
 export async function canInitiateChat(userId: string): Promise<boolean> {
+  // Input validation
+  if (!userId || typeof userId !== 'string') {
+    return false;
+  }
+  
   const status = await getChatLimitStatus(userId);
   return !status.isLimitReached;
 }

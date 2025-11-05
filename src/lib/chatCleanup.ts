@@ -47,7 +47,7 @@ export async function cleanupOldMessages(): Promise<number> {
     });
 
     await Promise.all(deletePromises);
-    console.log(`✓ Cleaned up ${deletedCount} old messages`);
+    // Silently cleaned up old messages
     
     return deletedCount;
   } catch (error) {
@@ -88,7 +88,7 @@ export async function deleteAllMessages(): Promise<number> {
     });
 
     await Promise.all(deletePromises);
-    console.log(`✓ Deleted all ${deletedCount} messages`);
+    // Silently deleted all messages
     
     return deletedCount;
   } catch (error) {
@@ -103,7 +103,7 @@ export async function deleteAllMessages(): Promise<number> {
 export async function deleteChat(chatId: string): Promise<void> {
   const chatRef = ref(database, `chats/${chatId}`);
   await remove(chatRef);
-  console.log(`✓ Deleted chat: ${chatId}`);
+  // Silently deleted chat
 }
 
 /**

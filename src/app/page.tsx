@@ -7,6 +7,8 @@ import { useDailyId } from '@/hooks/useDailyId';
 import { useChatLimit } from '@/hooks/useChatLimit';
 import { formatDailyId } from '@/lib/dailyId';
 import { formatTimeUntilReset } from '@/lib/chatLimitService';
+import { getChat } from '@/lib/chatService';
+import { generateChatId } from '@/lib/chatUtils';
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -15,6 +17,7 @@ export default function Home() {
   const chatLimit = useChatLimit(user?.uid || null);
   const router = useRouter();
   const [targetId, setTargetId] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -60,20 +63,33 @@ export default function Home() {
               )}
             </div>
 
-            {error ? (
-              <div className={styles.error}>
-                <p>Failed to load ID</p>
-                <span>{error}</span>
-              </div>
-            ) : dailyId ? (
-              <div className={styles.dailyId}>
-                {formatDailyId(dailyId)}
-              </div>
-            ) : (
-              <div className={styles.dailyId}>
-                ---- ----
-              </div>
-            )}
+              {error ? (
+                <div className={styles.error}>
+                  <p>Failed to load ID</p>
+                  <span>{error}</span>
+                </div>
+              ) : dailyId ? (
+                <div className={styles.dailyIdWrapper}>
+                  <div className={styles.dailyId}>
+                    {formatDailyId(dailyId)}
+                  </div>
+                  <button
+                    className={styles.copyButton}
+                    onClick={() => {
+                      navigator.clipboard.writeText(dailyId);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    title="Copy ID"
+                  >
+                    {copied ? '✓' : '📋'}
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.dailyId}>
+                  ---- ----
+                </div>
+              )}
 
             <p className={styles.idDescription}>
               This ID resets at midnight PKT and is completely anonymous
@@ -99,23 +115,47 @@ export default function Home() {
                 disabled={chatLimit.isLimitReached}
               />
               
-              <button
-                onClick={async () => {
-                  if (targetId.length === 8 && dailyId && targetId !== dailyId) {
-                    // Record chat initiation
-                    const result = await chatLimit.recordChatInitiation();
-                    
-                    if (result.success) {
-                      router.push(`/chat/${targetId}`);
-                    } else {
-                      alert(result.message || 'Failed to start chat');
-                    }
-                  } else if (targetId === dailyId) {
-                    alert('You cannot chat with yourself!');
-                  } else {
-                    alert('Please enter a valid 8-digit ID');
-                  }
-                }}
+                  <button
+                    onClick={async () => {
+                      // Validation checks
+                      if (!targetId || targetId.length !== 8) {
+                        alert('Please enter a valid 8-digit ID');
+                        return;
+                      }
+                      
+                      if (!dailyId) {
+                        alert('Your ID is not ready yet. Please wait...');
+                        return;
+                      }
+                      
+                      if (targetId === dailyId) {
+                        alert('You cannot chat with yourself!');
+                        return;
+                      }
+                      
+                      try {
+                        // Check if chat already exists
+                        const chatId = generateChatId(dailyId, targetId);
+                        const existingChat = await getChat(chatId);
+                        
+                        if (existingChat) {
+                          // Chat already exists - navigate without incrementing limit
+                          router.push(`/chat/${targetId}`);
+                        } else {
+                          // New chat - increment limit before navigating
+                          const result = await chatLimit.recordChatInitiation();
+                          
+                          if (result.success) {
+                            router.push(`/chat/${targetId}`);
+                          } else {
+                            alert(result.message || 'Failed to start chat');
+                          }
+                        }
+                      } catch (error) {
+                        console.error('Error checking chat:', error);
+                        alert('Failed to start chat. Please try again.');
+                      }
+                    }}
                 disabled={chatLimit.isLimitReached || !targetId || targetId.length !== 8}
                 className={styles.startChatButton}
               >

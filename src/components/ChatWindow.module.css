@@ -148,6 +148,38 @@
   color: var(--text-tertiary);
 }
 
+/* System message styling */
+.systemMessageWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--spacing-md) 0;
+}
+
+.systemBubble {
+  background: rgba(138, 43, 226, 0.1);
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  max-width: 80%;
+  text-align: center;
+}
+
+.systemBubble p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.systemTimestamp {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: var(--spacing-xs);
+  text-align: center;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .messageWrapper {
@@ -161,6 +193,11 @@
   .bubble {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: 0.9rem;
+  }
+  
+  .systemBubble {
+    max-width: 90%;
+    font-size: 0.8rem;
   }
 }
 

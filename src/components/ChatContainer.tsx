@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDailyId } from '@/hooks/useDailyId';
@@ -8,6 +8,7 @@ import { useChat } from '@/hooks/useChat';
 import ChatWindow from './ChatWindow';
 import ChatInput from './ChatInput';
 import PurgeWarning from './PurgeWarning';
+import FavoriteButton from './FavoriteButton';
 import styles from './ChatContainer.module.css';
 
 interface ChatContainerProps {
@@ -28,6 +29,8 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
     myDailyId: dailyId || '',
     otherDailyId
   });
+  
+  // Connection status updates via real-time listeners in FavoriteButton
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -88,6 +91,13 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
           <h2>Chat with {otherDailyId}</h2>
           <span className={styles.subtitle}>One-to-one conversation</span>
         </div>
+            <div className={styles.favoriteSection}>
+              <FavoriteButton
+                userId={user?.uid || null}
+                userDailyId={dailyId}
+                targetDailyId={otherDailyId}
+              />
+            </div>
       </div>
 
       {/* Purge Warning */}

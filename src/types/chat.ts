@@ -13,6 +13,7 @@ export interface Message {
   text: string; // Message content
   timestamp: number; // Unix timestamp in milliseconds
   read?: boolean; // Optional: Message read status
+  isSystemMessage?: boolean; // System-generated notification (favorites, etc.)
 }
 
 /**

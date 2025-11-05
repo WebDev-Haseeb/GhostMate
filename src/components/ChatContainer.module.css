@@ -60,6 +60,11 @@
   color: var(--text-tertiary);
 }
 
+.favoriteSection {
+  display: flex;
+  align-items: center;
+}
+
 /* Warning container */
 .warningContainer {
   padding: var(--spacing-sm) var(--spacing-lg);

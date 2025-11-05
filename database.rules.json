@@ -7,11 +7,11 @@
         "participants": {
           ".validate": "newData.hasChildren()"
         },
-        "messages": {
-          "$messageId": {
-            ".validate": "newData.hasChildren(['senderId', 'text', 'timestamp']) && newData.child('senderId').isString() && newData.child('text').isString() && newData.child('timestamp').isNumber()"
-          }
-        }
+            "messages": {
+              "$messageId": {
+                ".validate": "newData.hasChildren(['senderId', 'text', 'timestamp']) && newData.child('senderId').isString() && newData.child('text').isString() && newData.child('timestamp').isNumber() && (!newData.hasChild('isSystemMessage') || newData.child('isSystemMessage').isBoolean())"
+              }
+            }
       }
     }
   }

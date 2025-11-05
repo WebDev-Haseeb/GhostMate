@@ -34,9 +34,25 @@ export default function ChatWindow({ messages, myDailyId, otherDailyId }: ChatWi
       <div className={styles.messagesContainer}>
         {messages.map((message, index) => {
           const isMyMessage = message.senderId === myDailyId;
+          const isSystem = message.isSystemMessage;
           const showTimestamp = 
             index === 0 || 
             (messages[index - 1].timestamp - message.timestamp) > 60000; // 1 min gap
+
+          if (isSystem) {
+            return (
+              <div key={message.id} className={styles.systemMessageWrapper}>
+                <div className={styles.systemBubble}>
+                  <p>{message.text}</p>
+                </div>
+                {showTimestamp && (
+                  <div className={styles.systemTimestamp}>
+                    {formatMessageTime(message.timestamp)}
+                  </div>
+                )}
+              </div>
+            );
+          }
 
           return (
             <div

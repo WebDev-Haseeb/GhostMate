@@ -41,6 +41,7 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
+NEXT_PUBLIC_FIREBASE_DATABASE_URL=https://your_project.firebaseio.com
 ```
 
 ### Getting Started
@@ -65,14 +66,6 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
 ```bash
 npm run build
 npm start
-```
-
-### Generate Icons
-
-To regenerate PWA icons from the ghostmode.svg logo:
-
-```bash
-node scripts/generate-icons.js
 ```
 
 ## 📱 PWA Features
