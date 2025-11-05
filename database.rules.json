@@ -9,7 +9,7 @@
         },
         "messages": {
           "$messageId": {
-            ".validate": "newData.hasChildren(['senderId', 'text', 'timestamp'])"
+            ".validate": "newData.hasChildren(['senderId', 'text', 'timestamp']) && newData.child('senderId').isString() && newData.child('text').isString() && newData.child('timestamp').isNumber()"
           }
         }
       }
