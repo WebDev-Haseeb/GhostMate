@@ -22,7 +22,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-lg);
 }
 
 .intro h1 {
@@ -34,17 +34,81 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: ghostFade 3s ease-in-out infinite;
+  margin: 0;
 }
 
 .intro p {
   font-size: clamp(1.125rem, 2vw, 1.5rem);
   color: var(--foreground-secondary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--foreground-secondary);
+  margin: 0;
 }
 
 .tagline {
   font-size: clamp(1rem, 1.5vw, 1.125rem);
   color: var(--foreground-tertiary);
   font-style: italic;
+  margin: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  background: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(123, 104, 238, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.userInfo p {
+  font-size: 0.875rem;
+  color: var(--foreground-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.uid {
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: var(--accent-primary);
+  background: rgba(123, 104, 238, 0.1);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+}
+
+.signOutButton {
+  background: transparent;
+  color: var(--foreground-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(184, 184, 184, 0.2);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-top: var(--space-md);
+}
+
+.signOutButton:hover {
+  color: var(--foreground-primary);
+  background: rgba(123, 104, 238, 0.05);
+  border-color: rgba(123, 104, 238, 0.3);
+  transform: translateY(-1px);
+}
+
+.signOutButton:active {
+  transform: translateY(0);
 }
 
 @media (max-width: 600px) {
@@ -54,5 +118,9 @@
   
   .main {
     gap: var(--space-lg);
+  }
+
+  .intro {
+    gap: var(--space-md);
   }
 }

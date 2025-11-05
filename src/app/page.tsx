@@ -1,45 +1,53 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import styles from "./page.module.css";
 
-// Structured Data for SEO
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "GhostMate",
-  "description": "Connect anonymously, chat freely, and disappear daily. GhostMate keeps your identity safe while you explore genuine human connections.",
-  "applicationCategory": "SocialNetworkingApplication",
-  "operatingSystem": "Any",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "ratingCount": "100"
-  }
-};
-
 export default function Home() {
-  return (
-    <>
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-      
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
       <div className={styles.page}>
         <main className={styles.main}>
           <div className={styles.intro}>
-            <h1>GhostMate</h1>
-            <p>Anonymous Conversations, Real Connections</p>
-            <p className={styles.tagline}>
-              Connect anonymously, chat freely, and disappear daily.
-            </p>
+            <p>Loading...</p>
           </div>
         </main>
       </div>
-    </>
+    );
+  }
+
+  if (!user) {
+    return null; // Redirecting...
+  }
+
+  return (
+    <div className={styles.page}>
+      <main className={styles.main}>
+        <div className={styles.intro}>
+          <h1>Welcome to GhostMate</h1>
+          <p className={styles.subtitle}>You're signed in!</p>
+          
+          <div className={styles.userInfo}>
+            <p>Your Firebase UID:</p>
+            <code className={styles.uid}>{user.uid}</code>
+          </div>
+
+          <button onClick={signOut} className={styles.signOutButton}>
+            Sign Out
+          </button>
+        </div>
+      </main>
+    </div>
   );
 }

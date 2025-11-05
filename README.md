@@ -27,7 +27,21 @@ Connect anonymously, chat freely, and disappear daily. GhostMate keeps your iden
 
 - Node.js 18+ 
 - npm or yarn
-- Firebase account
+- Firebase account & project configured
+
+### Environment Setup
+
+Create a `.env` file in the project root with your Firebase credentials:
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
+```
 
 ### Getting Started
 
@@ -37,12 +51,14 @@ Connect anonymously, chat freely, and disappear daily. GhostMate keeps your iden
    npm install
    ```
 
-3. Run the development server:
+3. Configure Firebase (see Environment Setup above)
+
+4. Run the development server:
    ```bash
    npm run dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000)
+5. Open [http://localhost:3000](http://localhost:3000)
 
 ### Build for Production
 

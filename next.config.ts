@@ -15,6 +15,28 @@ const withPWA = withPWAInit({
 const nextConfig: NextConfig = {
   // Explicitly use webpack for next-pwa compatibility
   turbopack: {},
+  
+  // Disable React Strict Mode to prevent double-mounting issues with Firebase Auth
+  reactStrictMode: false,
+  
+  // Add headers to allow Firebase Auth popup
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'unsafe-none',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withPWA(nextConfig);
