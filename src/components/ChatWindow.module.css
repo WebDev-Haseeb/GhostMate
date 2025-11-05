@@ -1,0 +1,166 @@
+.chatWindow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.messagesContainer {
+  flex: 1;
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+.messagesContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+.messagesContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* Message wrapper */
+.messageWrapper {
+  display: flex;
+  flex-direction: column;
+  animation: fadeSlideIn 0.3s ease-out;
+  max-width: 80%;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.myMessage {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.theirMessage {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+/* Timestamp */
+.timestamp {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-xs);
+  padding: 0 var(--spacing-sm);
+  text-align: center;
+}
+
+/* Message bubble */
+.bubble {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.bubble:hover {
+  transform: translateY(-2px);
+}
+
+.bubble p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* My message styling */
+.myMessage .bubble {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  border-bottom-right-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3);
+}
+
+/* Their message styling */
+.theirMessage .bubble {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+/* Empty state */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  color: var(--text-tertiary);
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.ghostIcon {
+  font-size: 4rem;
+  animation: float 3s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.emptyState p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.emptyState span {
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .messageWrapper {
+    max-width: 85%;
+  }
+
+  .messagesContainer {
+    padding: var(--spacing-md);
+  }
+
+  .bubble {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9rem;
+  }
+}
+

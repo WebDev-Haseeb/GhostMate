@@ -39,8 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       const { signInWithPopup } = await import('firebase/auth');
-      const result = await signInWithPopup(auth, provider);
-      return result;
+      await signInWithPopup(auth, provider);
     } catch (error: any) {
       console.error('Sign-in error:', error?.code || error?.message);
       throw error;

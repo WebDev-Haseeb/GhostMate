@@ -1,0 +1,51 @@
+.warning {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: var(--radius-md);
+  color: #ffc107;
+  font-size: 0.85rem;
+}
+
+.icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.text strong {
+  font-weight: 600;
+  color: #ffc107;
+}
+
+.countdown {
+  font-size: 0.75rem;
+  color: rgba(255, 193, 7, 0.8);
+  font-family: monospace;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .warning {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.8rem;
+  }
+
+  .text {
+    gap: 1px;
+  }
+
+  .countdown {
+    font-size: 0.7rem;
+  }
+}
+
