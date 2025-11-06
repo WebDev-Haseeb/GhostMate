@@ -51,21 +51,7 @@ export function useHighlights({
 
   // Set up real-time listeners for all messages
   useEffect(() => {
-    console.log('🎧 useHighlights useEffect triggered:', {
-      userId,
-      otherUserId,
-      chatId,
-      messageCount: messages.length,
-      shouldSetupListeners: Boolean(userId && otherUserId && chatId && messages.length > 0)
-    });
-    
     if (!userId || !otherUserId || !chatId || messages.length === 0) {
-      console.warn('⚠️ Skipping highlight listeners - missing data:', {
-        hasUserId: !!userId,
-        hasOtherUserId: !!otherUserId,
-        hasChatId: !!chatId,
-        messageCount: messages.length
-      });
       return;
     }
 
@@ -74,19 +60,15 @@ export function useHighlights({
     // Listen to highlight status for each message
     messages.forEach((message) => {
       if (message.isSystemMessage) {
-        console.log('⏭️ Skipping system message:', message.id);
         return; // Don't highlight system messages
       }
-
-      console.log('🎯 Setting up highlight listener for message:', message.id);
       
       const unsubscribe = listenToMessageHighlightStatus(
         userId,
         otherUserId,
         message.id,
-        chatId,  // Added chatId parameter
+        chatId,
         (status) => {
-          console.log('📡 Highlight status update for message', message.id, ':', status);
           setHighlightStatuses((prev) => {
             const next = new Map(prev);
             next.set(message.id, status);
@@ -98,11 +80,8 @@ export function useHighlights({
       unsubscribers.push(unsubscribe);
     });
 
-    console.log('✅ Set up', unsubscribers.length, 'highlight listeners');
-
     // Cleanup listeners
     return () => {
-      console.log('🧹 Cleaning up', unsubscribers.length, 'highlight listeners');
       unsubscribers.forEach((unsub) => unsub());
     };
   }, [userId, otherUserId, chatId, messages]);
@@ -152,11 +131,8 @@ export function useHighlights({
 
           if (!result.success) {
             setError(result.message || 'Failed to add highlight');
-          } else if (result.mutualHighlight) {
-            // Show success message for mutual highlight
-            console.log('✨ Mutual highlight created!', result.message);
-            // You could add a toast notification here
           }
+          // Note: Mutual highlights are automatically queued for admin review
         }
       } catch (err: any) {
         console.error('Error toggling highlight:', err);

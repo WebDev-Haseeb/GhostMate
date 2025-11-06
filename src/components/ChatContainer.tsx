@@ -56,19 +56,6 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
     messages
   });
   
-  // Debug: Log highlight setup
-  useEffect(() => {
-    console.log('🎯 Highlight Setup:', {
-      userId: user?.uid,
-      otherUserId,
-      chatId,
-      myDailyId: dailyId,
-      otherDailyId,
-      highlightingEnabled: Boolean(user?.uid && otherUserId && chatId),
-      messageCount: messages.length
-    });
-  }, [user?.uid, otherUserId, chatId, dailyId, otherDailyId, messages.length]);
-  
   // Fetch other user's Firebase UID
   useEffect(() => {
     if (!otherDailyId) {
@@ -79,20 +66,16 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
     setOtherUserIdLoading(true);
     setOtherUserIdError(null);
     
-    console.log('🔍 Fetching Firebase UID for daily ID:', otherDailyId);
-    
     getUserIdFromDailyId(otherDailyId).then((uid) => {
       if (uid) {
-        console.log('✅ Found Firebase UID:', uid, 'for daily ID:', otherDailyId);
         setOtherUserId(uid);
         setOtherUserIdError(null);
       } else {
-        console.warn('⚠️ No Firebase UID found for daily ID:', otherDailyId);
         setOtherUserIdError('This Daily ID does not exist or has expired.');
       }
       setOtherUserIdLoading(false);
     }).catch((err) => {
-      console.error('❌ Error fetching other user ID:', err);
+      console.error('Error fetching other user ID:', err);
       setOtherUserIdError('Failed to validate Daily ID.');
       setOtherUserIdLoading(false);
     });
