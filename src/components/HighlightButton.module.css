@@ -1,0 +1,236 @@
+.highlightButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+  position: relative;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.highlightButton:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.highlightButton:active {
+  transform: scale(0.95);
+}
+
+/* Not highlighted state */
+.notHighlighted {
+  opacity: 0.4;
+}
+
+.notHighlighted:hover {
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Highlighted by me state */
+.highlighted {
+  opacity: 1;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.1));
+}
+
+.highlighted:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 140, 0, 0.2));
+}
+
+.highlighted .icon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Highlighted by other user state (not me) - VERY VISIBLE! */
+.otherHighlighted {
+  opacity: 1 !important;  /* Force always visible */
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.4), rgba(123, 104, 238, 0.3));
+  border: 2px dashed rgba(138, 43, 226, 0.7);  /* Thicker, more visible border */
+  box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);  /* Glow effect */
+}
+
+.otherHighlighted:hover {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.5), rgba(123, 104, 238, 0.4));
+  box-shadow: 0 0 16px rgba(138, 43, 226, 0.7);
+  transform: scale(1.15);  /* Slightly bigger on hover */
+}
+
+.otherHighlighted .icon {
+  animation: twinkle 1.5s ease-in-out infinite;
+  font-size: 1.25rem;  /* Slightly larger icon */
+}
+
+/* Mutual highlight state (both users highlighted) */
+.mutual {
+  opacity: 1;
+  background: linear-gradient(135deg, rgba(123, 104, 238, 0.3), rgba(255, 107, 53, 0.2));
+  box-shadow: 0 0 10px rgba(123, 104, 238, 0.4);
+}
+
+.mutual:hover {
+  background: linear-gradient(135deg, rgba(123, 104, 238, 0.4), rgba(255, 107, 53, 0.3));
+  box-shadow: 0 0 15px rgba(123, 104, 238, 0.6);
+}
+
+.mutual .icon {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+/* Loading state */
+.loading {
+  opacity: 0.5;
+  cursor: wait;
+  pointer-events: none;
+}
+
+.loading .icon {
+  animation: spin 1s linear infinite;
+}
+
+/* Disabled state */
+.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Locked state (mutual highlight, cannot remove) */
+.locked {
+  cursor: not-allowed;
+}
+
+.locked:not(.mutual) {
+  opacity: 0.7;
+}
+
+/* Icon styling */
+.icon {
+  display: inline-block;
+  line-height: 1;
+  font-size: 1.125rem;
+}
+
+/* Lock icon */
+.lockIcon {
+  display: inline-block;
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(1.1) rotate(-5deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(0deg);
+  }
+  75% {
+    opacity: 0.8;
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .highlightButton {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1.25rem;
+    padding: 0.5rem;
+  }
+
+  .icon {
+    font-size: 1.375rem;
+  }
+}
+
+/* Accessibility - Focus states */
+.highlightButton:focus {
+  outline: 2px solid var(--accent-color, #7B68EE);
+  outline-offset: 2px;
+}
+
+.highlightButton:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .highlightButton {
+    border: 1px solid currentColor;
+  }
+
+  .highlighted {
+    background: rgba(255, 215, 0, 0.4);
+  }
+
+  .mutual {
+    background: rgba(123, 104, 238, 0.5);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .highlightButton {
+    transition: none;
+  }
+
+  .icon {
+    animation: none !important;
+  }
+
+  .highlightButton:hover {
+    transform: none;
+  }
+
+  .highlightButton:active {
+    transform: none;
+  }
+}
+

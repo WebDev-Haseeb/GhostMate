@@ -180,6 +180,40 @@
   text-align: center;
 }
 
+/* Highlight button container */
+.highlightButtonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-xs);
+  opacity: 1;  /* Always show - changed from 0 */
+  transition: opacity 0.2s ease;
+}
+
+/* Desktop: show on hover for not-highlighted messages, always show for highlighted */
+@media (min-width: 769px) {
+  .highlightButtonContainer {
+    opacity: 0;  /* Hide by default on desktop */
+  }
+  
+  .bubble:hover .highlightButtonContainer {
+    opacity: 1;  /* Show on hover */
+  }
+  
+  /* Always show when message is highlighted by anyone */
+  .bubble:has(.highlightButtonContainer button:not([class*="notHighlighted"])) .highlightButtonContainer {
+    opacity: 1;
+  }
+}
+
+/* Always show highlight button on mobile */
+@media (max-width: 768px) {
+  .highlightButtonContainer {
+    opacity: 1;
+  }
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .messageWrapper {

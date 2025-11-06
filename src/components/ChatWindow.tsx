@@ -3,16 +3,35 @@
 import { useEffect, useRef } from 'react';
 import { Message } from '@/types/chat';
 import { formatMessageTime } from '@/lib/chatUtils';
+import HighlightButton from './HighlightButton';
+import type { MessageHighlightStatus } from '@/types/highlights';
 import styles from './ChatWindow.module.css';
 
 interface ChatWindowProps {
   messages: Message[];
   myDailyId: string;
   otherDailyId: string;
+  userId?: string;              // Firebase UID for highlight feature
+  otherUserId?: string;         // Firebase UID of other user
+  chatId?: string;              // Chat ID for highlights
+  highlightStatuses?: Map<string, MessageHighlightStatus>;  // Highlight status per message
+  onToggleHighlight?: (messageId: string, message: Message) => Promise<void>;  // Highlight toggle handler
 }
 
-export default function ChatWindow({ messages, myDailyId, otherDailyId }: ChatWindowProps) {
+export default function ChatWindow({ 
+  messages, 
+  myDailyId, 
+  otherDailyId,
+  userId,
+  otherUserId,
+  chatId,
+  highlightStatuses,
+  onToggleHighlight
+}: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Check if highlighting is enabled
+  const highlightingEnabled = Boolean(userId && otherUserId && chatId && onToggleHighlight);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -54,6 +73,17 @@ export default function ChatWindow({ messages, myDailyId, otherDailyId }: ChatWi
             );
           }
 
+          // Get highlight status for this message
+          const highlightStatus = highlightStatuses?.get(message.id) || {
+            messageId: message.id,
+            highlightedByMe: false,
+            highlightedByOther: false,
+            isMutual: false,
+            queuedForStory: false,
+            isLocked: false,
+            lockExpiresAt: undefined
+          };
+
           return (
             <div
               key={message.id}
@@ -66,6 +96,15 @@ export default function ChatWindow({ messages, myDailyId, otherDailyId }: ChatWi
               )}
               <div className={styles.bubble}>
                 <p>{message.text}</p>
+                {highlightingEnabled && (
+                  <div className={styles.highlightButtonContainer}>
+                    <HighlightButton
+                      messageId={message.id}
+                      status={highlightStatus}
+                      onToggle={() => onToggleHighlight!(message.id, message)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           );

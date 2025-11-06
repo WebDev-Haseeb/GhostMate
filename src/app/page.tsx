@@ -135,6 +135,15 @@ export default function Home() {
                       }
                       
                       try {
+                        // ✅ NEW: Validate that the other daily ID exists in Firestore
+                        const { getUserIdFromDailyId } = await import('@/lib/dailyIdService');
+                        const otherUserId = await getUserIdFromDailyId(targetId);
+                        
+                        if (!otherUserId) {
+                          alert('⚠️ This Daily ID does not exist or has expired.\n\nPlease check the ID and try again.');
+                          return;
+                        }
+
                         // Check if chat already exists
                         const chatId = generateChatId(dailyId, targetId);
                         const existingChat = await getChat(chatId);

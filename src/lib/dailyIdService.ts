@@ -168,14 +168,20 @@ export async function refreshDailyId(userId: string): Promise<string> {
  */
 export async function getUserIdFromDailyId(dailyId: string): Promise<string | null> {
   try {
+    console.log('🔍 getUserIdFromDailyId called with:', dailyId);
+    
     const dailyIdDocRef = doc(db, 'dailyIds', dailyId);
     const dailyIdDoc = await getDoc(dailyIdDocRef);
     
+    console.log('📄 Daily ID doc exists:', dailyIdDoc.exists());
+    
     if (!dailyIdDoc.exists()) {
+      console.warn('⚠️ Daily ID document not found:', dailyId);
       return null;
     }
     
     const data = dailyIdDoc.data();
+    console.log('📦 Daily ID data:', data);
     
     // Check if the ID is still valid (not expired)
     if (data.expiresAt && data.expiresAt.toDate() < getTodayMidnight()) {
