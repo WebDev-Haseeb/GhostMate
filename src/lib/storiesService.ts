@@ -89,11 +89,11 @@ export async function approveStory(
     }
     
     // Check if story is locked (not expired)
-    if (queuedStory.locked) {
+    if (queuedStory.locked && queuedStory.lockExpiresAt) {
       const now = new Date();
-      const expiresAt = queuedStory.lockExpiresAt instanceof Timestamp
-        ? queuedStory.lockExpiresAt.toDate()
-        : new Date(queuedStory.lockExpiresAt);
+      // Handle both Firestore Timestamp and regular Date/number
+      const lockExpiry = queuedStory.lockExpiresAt as any;
+      const expiresAt = lockExpiry?.toDate ? lockExpiry.toDate() : new Date(lockExpiry);
       
       if (expiresAt > now) {
         // Story is still locked, cannot approve
@@ -101,18 +101,16 @@ export async function approveStory(
       }
     }
     
-    // Create approved story
+    // Create approved story (public - no sensitive metadata)
     const approvedStoryRef = doc(db, 'approvedStories', storyId);
     const approvedStory: ApprovedStory = {
       storyId,
       messageText: queuedStory.messageText,
+      originalTimestamp: queuedStory.originalTimestamp,
       approvedAt: serverTimestamp(),
       approvedBy: adminId,
       expiresAt: Timestamp.fromDate(getExpiry24Hours()),
-      metadata: {
-        ...queuedStory.metadata,
-        originalQueuedAt: queuedStory.queuedAt,
-      }
+      viewCount: 0,
     };
     
     await setDoc(approvedStoryRef, approvedStory);
@@ -183,12 +181,13 @@ export async function getApprovedStories(limitCount: number = 50): Promise<Appro
     } as ApprovedStory));
     
     return stories.sort((a, b) => {
-      const timeA = a.approvedAt && typeof a.approvedAt !== 'string' 
-        ? a.approvedAt.toMillis() 
-        : 0;
-      const timeB = b.approvedAt && typeof b.approvedAt !== 'string' 
-        ? b.approvedAt.toMillis() 
-        : 0;
+      // Handle Timestamp type safely
+      const timeA = a.approvedAt && typeof a.approvedAt === 'object' && 'toMillis' in a.approvedAt 
+        ? (a.approvedAt as Timestamp).toMillis() 
+        : (typeof a.approvedAt === 'number' ? a.approvedAt : 0);
+      const timeB = b.approvedAt && typeof b.approvedAt === 'object' && 'toMillis' in b.approvedAt 
+        ? (b.approvedAt as Timestamp).toMillis() 
+        : (typeof b.approvedAt === 'number' ? b.approvedAt : 0);
       return timeB - timeA; // Most recent first
     });
   } catch (error) {

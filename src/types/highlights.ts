@@ -7,7 +7,7 @@
  * - Admin story queue
  */
 
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, FieldValue } from 'firebase/firestore';
 
 /**
  * Represents a single message highlight by a user
@@ -83,9 +83,10 @@ export interface ApprovedStory {
   storyId: string;
   messageText: string;
   originalTimestamp: number;          // For "X hours ago" display
-  approvedAt: number;                 // When admin approved
-  expiresAt: number;                  // Auto-delete after 24h
+  approvedAt: number | FieldValue;    // When admin approved (can be serverTimestamp)
+  expiresAt: number | Timestamp;      // Auto-delete after 24h
   viewCount: number;                  // How many users viewed
+  approvedBy?: string;                // Admin who approved
   likeCount?: number;                 // Optional: future feature
 }
 

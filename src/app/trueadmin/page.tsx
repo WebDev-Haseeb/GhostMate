@@ -189,7 +189,8 @@ export default function TrueAdminPanel() {
                       try {
                         // Handle Firestore Timestamp
                         if (story.queuedAt && typeof story.queuedAt === 'object' && 'toDate' in story.queuedAt) {
-                          return new Date(story.queuedAt.toDate()).toLocaleDateString('en-US', {
+                          const timestamp = story.queuedAt as { toDate: () => Date };
+                          return new Date(timestamp.toDate()).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             hour: '2-digit',
@@ -197,7 +198,7 @@ export default function TrueAdminPanel() {
                           });
                         }
                         // Handle regular Date or timestamp
-                        return new Date(story.queuedAt).toLocaleDateString('en-US', {
+                        return new Date(story.queuedAt as Date | number).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           hour: '2-digit',

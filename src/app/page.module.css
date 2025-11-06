@@ -117,11 +117,11 @@
 }
 
 .dailyId {
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: clamp(2.5rem, 8vw, 4rem);
   font-weight: 700;
   color: var(--foreground-primary);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em; /* Slightly wider for monospace readability */
   text-align: center;
   background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
   -webkit-background-clip: text;

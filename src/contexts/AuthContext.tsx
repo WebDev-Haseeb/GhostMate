@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (): Promise<void> => {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
@@ -47,8 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       const { signInWithPopup } = await import('firebase/auth');
-      const result = await signInWithPopup(auth, provider);
-      return result;
+      await signInWithPopup(auth, provider);
+      // User state will be updated by onAuthStateChanged listener
     } catch (error: any) {
       // Handle specific errors
       if (error?.code === 'auth/popup-blocked') {
