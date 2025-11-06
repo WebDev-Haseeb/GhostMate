@@ -379,6 +379,30 @@
   font-weight: 500;
 }
 
+/* Random Connect Section */
+.randomSection {
+  width: 100%;
+  max-width: 500px;
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--background-secondary);
+  border: 1px solid rgba(123, 104, 238, 0.2);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.randomSection h2 {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-xs);
+  color: var(--foreground-primary);
+}
+
+.randomSubtitle {
+  font-size: 0.9rem;
+  color: var(--foreground-tertiary);
+  margin-bottom: var(--space-md);
+}
+
 @media (max-width: 600px) {
   .page {
     padding: var(--space-md);

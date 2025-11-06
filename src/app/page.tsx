@@ -9,6 +9,7 @@ import { formatDailyId } from '@/lib/dailyId';
 import { formatTimeUntilReset } from '@/lib/chatLimitService';
 import { getChat } from '@/lib/chatService';
 import { generateChatId } from '@/lib/chatUtils';
+import RandomConnect from '@/components/RandomConnect';
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -187,6 +188,17 @@ export default function Home() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Random Connect Section */}
+          <div className={styles.randomSection}>
+            <h2>Or Try Random Connect</h2>
+            <p className={styles.randomSubtitle}>Get paired with a random user instantly</p>
+            
+            <RandomConnect 
+              userId={user?.uid || null}
+              userDailyId={dailyId}
+            />
           </div>
 
           <button onClick={signOut} className={styles.signOutButton}>
