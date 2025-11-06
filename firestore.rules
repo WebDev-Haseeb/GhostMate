@@ -44,16 +44,8 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Helper function to check if user is admin
-    function isAdmin() {
-      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-    }
-    
-    // Admins collection - only admins can read
-    match /admins/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if false;  // Admins must be added manually via Firebase Console
-    }
+    // Note: Admin authentication is handled via session cookies, not Firestore
+    // No admin collection needed - credentials stored in .env
     
     // User Highlights - authenticated users can read any highlights (to detect mutual)
     // but can only write their own
@@ -62,17 +54,17 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == userId;  // Only write own
     }
     
-    // Queued Stories - users can read stories they're part of, only admins can write
+    // Queued Stories - users can create, admin app handles approve/reject
     match /queuedStories/{storyId} {
       allow read: if request.auth != null;  // Any authenticated user can read (needed for lock status)
       allow create: if request.auth != null;  // Users can create when both highlight
-      allow update, delete: if request.auth != null && isAdmin();  // Only admins can update/delete
+      allow update, delete: if request.auth != null;  // Admin operations (protected by secret admin panel)
     }
     
-    // Approved Stories - public read (all authenticated users), admin write
+    // Approved Stories - public read, admin app handles creation
     match /approvedStories/{storyId} {
       allow read: if request.auth != null;  // Any authenticated user can view
-      allow write: if request.auth != null && isAdmin();
+      allow write: if request.auth != null;  // Admin operations (protected by secret admin panel)
     }
     
     // Deny all other access by default

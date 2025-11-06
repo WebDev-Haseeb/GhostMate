@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@types/js-cookie": "^3.0.6",
     "firebase": "^12.5.0",
+    "js-cookie": "^3.0.5",
     "next": "16.0.1",
     "react": "19.2.0",
     "react-dom": "19.2.0"

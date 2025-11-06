@@ -210,9 +210,18 @@ export default function Home() {
             />
           </div>
 
-          <button onClick={signOut} className={styles.signOutButton}>
-            Sign Out
-          </button>
+          {/* Navigation Buttons */}
+          <div className={styles.navButtons}>
+            <button 
+              onClick={() => router.push('/stories')} 
+              className={styles.storiesButton}
+            >
+              ✨ Featured Stories
+            </button>
+            <button onClick={signOut} className={styles.signOutButton}>
+              Sign Out
+            </button>
+          </div>
         </div>
       </main>
     </div>

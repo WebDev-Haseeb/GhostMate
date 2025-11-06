@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, browserLocalPersistence, setPersistence } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -21,6 +22,9 @@ export const auth = getAuth(app);
 
 // Initialize Firebase Realtime Database
 export const database = getDatabase(app);
+
+// Initialize Firestore
+export const db = getFirestore(app);
 
 // Set persistence to LOCAL (stays after browser close)
 if (typeof window !== 'undefined') {
