@@ -22,7 +22,8 @@ export default function FavoriteButton({
     toggling,
     error,
     toggleFavorite,
-    lockExpiresAt
+    lockExpiresAt,
+    streakCount
   } = useFavorite({ userId, userDailyId, targetDailyId });
 
   const handleClick = async () => {
@@ -86,7 +87,16 @@ export default function FavoriteButton({
           <span className={styles.icon}>☆</span>
         )}
         
-        {hasMutual && <span className={styles.label}>Connected</span>}
+        {hasMutual && (
+          <div className={styles.connectionInfo}>
+            <span className={styles.label}>Connected</span>
+            {streakCount > 0 && (
+              <span className={styles.streak} title={`${streakCount}-day connection streak`}>
+                🔥 {streakCount}
+              </span>
+            )}
+          </div>
+        )}
         {isLocked && (
           <span className={styles.lockLabel}>🔒 Until midnight</span>
         )}

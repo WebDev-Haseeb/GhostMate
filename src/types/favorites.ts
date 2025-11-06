@@ -105,5 +105,6 @@ export interface FavoriteActionResult {
   connectionToken?: string;
   isLocked?: boolean;
   lockExpiresAt?: number;
+  streakCount?: number;
 }
 

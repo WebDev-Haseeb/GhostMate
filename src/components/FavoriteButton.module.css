@@ -58,11 +58,30 @@
   line-height: 1;
 }
 
+.connectionInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .label {
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.streak {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ff6b35;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 140, 0, 0.1));
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  animation: flicker 1.5s ease-in-out infinite;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .lockLabel {
@@ -90,6 +109,17 @@
   }
 }
 
+@keyframes flicker {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .favoriteButton {
@@ -101,8 +131,17 @@
     font-size: 1.125rem;
   }
 
+  .connectionInfo {
+    gap: 0.375rem;
+  }
+
   .label {
     font-size: 0.75rem;
+  }
+
+  .streak {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
   }
 
   .lockLabel {

@@ -466,7 +466,8 @@ export async function addFavorite(
               mutualConnection: true,
               connectionToken,
               isLocked: true,
-              lockExpiresAt
+              lockExpiresAt,
+              streakCount
             };
           } else {
             // New connection - create it
@@ -484,7 +485,8 @@ export async function addFavorite(
               mutualConnection: true,
               connectionToken,
               isLocked: true,
-              lockExpiresAt
+              lockExpiresAt,
+              streakCount
             };
           }
         }

@@ -34,6 +34,7 @@ interface UseFavoriteReturn {
   error: string | null;
   toggleFavorite: () => Promise<FavoriteActionResult>;
   lockExpiresAt: number | null;
+  streakCount: number;
 }
 
 /**
@@ -200,7 +201,8 @@ export function useFavorite({
     toggling,
     error,
     toggleFavorite,
-    lockExpiresAt
+    lockExpiresAt,
+    streakCount: connection?.streakCount || 0
   };
 }
 
