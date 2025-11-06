@@ -23,6 +23,16 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-lg);
+  animation: dashboardFadeIn 0.4s ease-out;
+}
+
+@keyframes dashboardFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .intro h1 {
@@ -169,6 +179,117 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-md);
+}
+
+.ghostLoader {
+  font-size: 5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.ghostLoader span {
+  display: inline-block !important;
+  animation: 
+    floatBounce 2s ease-in-out infinite,
+    scaleBreath 3s ease-in-out infinite,
+    glowPulse 1.5s ease-in-out infinite !important;
+  filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.5));
+  will-change: transform, filter, opacity;
+  transform-origin: center center;
+}
+
+.ghostLoader::before {
+  content: '';
+  position: absolute;
+  inset: -30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.15) 0%, transparent 70%);
+  animation: innerPulse 2s ease-out infinite;
+  z-index: -2;
+}
+
+.ghostLoader::after {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.25) 0%, transparent 70%);
+  animation: outerRipple 3s ease-out infinite;
+  z-index: -1;
+}
+
+/* Smooth float with bounce - SUBTLE & SMOOTH */
+@keyframes floatBounce {
+  0%, 100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  25% {
+    transform: translateY(-12px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(2deg);
+  }
+  75% {
+    transform: translateY(-12px) rotate(0deg);
+  }
+}
+
+/* Scale animation - GENTLE breathing */
+@keyframes scaleBreath {
+  0%, 100% {
+    transform: scale(0.95);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* Glow pulse - SOFT & ELEGANT */
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.6)) brightness(1);
+  }
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 35px rgba(138, 43, 226, 0.8)) brightness(1.1);
+  }
+}
+
+/* Inner pulse ring */
+@keyframes innerPulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Outer ripple ring */
+@keyframes outerRipple {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.loadingHint {
+  font-size: 0.875rem;
+  color: var(--foreground-tertiary);
+  font-style: italic;
+  margin-top: var(--space-sm);
+  animation: fadeIn 1s ease-in;
 }
 
 .spinner {

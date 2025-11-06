@@ -22,6 +22,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Check Firebase configuration
+  useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    if (!apiKey || apiKey === 'undefined') {
+      console.error('🔥 Firebase not configured - check .env file');
+    }
+  }, []);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -39,9 +47,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       const { signInWithPopup } = await import('firebase/auth');
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      return result;
     } catch (error: any) {
-      console.error('Sign-in error:', error?.code || error?.message);
+      // Handle specific errors
+      if (error?.code === 'auth/popup-blocked') {
+        throw new Error('Popup was blocked. Please allow popups for this site.');
+      } else if (error?.code === 'auth/popup-closed-by-user') {
+        throw new Error('Sign-in cancelled. Please try again.');
+      } else if (error?.code === 'auth/unauthorized-domain') {
+        throw new Error('This domain is not authorized. Add it to Firebase Console.');
+      } else if (error?.code === 'auth/operation-not-allowed') {
+        throw new Error('Google sign-in is not enabled in Firebase Console.');
+      }
+      
       throw error;
     }
   };

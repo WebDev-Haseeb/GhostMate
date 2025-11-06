@@ -1,151 +1,245 @@
-/* Privacy Notice Modal Styles */
+/**
+ * Privacy Notice Modal Styles
+ * 
+ * Beautiful modal matching the ghost theme with glassmorphism
+ */
+
+/* Overlay */
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(10, 10, 10, 0.95);
-  backdrop-filter: blur(10px);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-modal);
-  padding: var(--space-lg);
-  animation: fadeIn var(--transition-base);
+  padding: 1.5rem;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal */
 .modal {
-  background: var(--background-secondary);
-  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(26, 0, 51, 0.95) 0%, rgba(15, 0, 26, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 24px;
   max-width: 600px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(123, 104, 238, 0.2);
-  border: 1px solid rgba(123, 104, 238, 0.1);
-  animation: slideUp var(--transition-slow);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.5),
+    0 10px 10px -5px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(139, 92, 246, 0.2);
+  animation: slideUp 0.4s ease-out;
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Custom Scrollbar */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.5);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.7);
+}
+
+/* Header */
 .header {
-  padding: var(--space-xl);
-  border-bottom: 1px solid rgba(123, 104, 238, 0.1);
+  padding: 2rem 2rem 1.5rem;
   text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .header h2 {
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: var(--space-sm);
 }
 
 .subtitle {
-  color: var(--foreground-secondary);
   font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
 }
 
+/* Content */
 .content {
-  padding: var(--space-xl);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
+  padding: 2rem;
+  color: #ffffff;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section:last-child {
+  margin-bottom: 0;
 }
 
 .section h3 {
   font-size: 1.125rem;
-  color: var(--foreground-primary);
-  margin-bottom: var(--space-sm);
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: #ffffff;
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 0.5rem;
 }
 
 .section p {
-  color: var(--foreground-secondary);
+  font-size: 0.9375rem;
   line-height: 1.6;
-  margin-bottom: var(--space-sm);
+  margin: 0 0 0.75rem 0;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .section ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.5rem;
 }
 
 .section li {
-  color: var(--foreground-secondary);
-  padding-left: var(--space-lg);
-  position: relative;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.5rem;
 }
 
-.section li::before {
-  content: "•";
-  position: absolute;
-  left: var(--space-sm);
-  color: var(--accent-primary);
-  font-weight: bold;
+.section li:last-child {
+  margin-bottom: 0;
 }
 
-.footer {
-  padding: var(--space-xl);
-  border-top: 1px solid rgba(123, 104, 238, 0.1);
-  display: flex;
-  justify-content: center;
-}
-
-.acceptButton {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  color: var(--foreground-primary);
-  font-size: 1.125rem;
+.section strong {
+  color: #a78bfa;
   font-weight: 600;
-  padding: var(--space-md) var(--space-2xl);
-  border-radius: var(--radius-lg);
+}
+
+/* Footer */
+.footer {
+  padding: 1.5rem 2rem 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+/* Accept Button */
+.acceptButton {
+  width: 100%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  color: #ffffff;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  padding: 1rem 2rem;
   border: none;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: 0 4px 20px var(--accent-glow);
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 6px -1px rgba(139, 92, 246, 0.3),
+    0 2px 4px -1px rgba(139, 92, 246, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.acceptButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.acceptButton:hover::before {
+  left: 100%;
 }
 
 .acceptButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 30px var(--accent-glow);
+  box-shadow: 
+    0 10px 15px -3px rgba(139, 92, 246, 0.4),
+    0 4px 6px -2px rgba(139, 92, 246, 0.3);
 }
 
 .acceptButton:active {
   transform: translateY(0);
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 600px) {
-  .overlay {
-    padding: var(--space-md);
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .modal {
+    max-height: 90vh;
+    border-radius: 20px;
   }
 
-  .header,
-  .content,
-  .footer {
-    padding: var(--space-lg);
+  .header {
+    padding: 1.5rem 1.5rem 1.25rem;
   }
 
   .header h2 {
     font-size: 1.5rem;
   }
-}
 
+  .content {
+    padding: 1.5rem;
+  }
+
+  .section h3 {
+    font-size: 1.0625rem;
+  }
+
+  .section p,
+  .section li {
+    font-size: 0.875rem;
+  }
+
+  .footer {
+    padding: 1.25rem 1.5rem 1.5rem;
+  }
+
+  .acceptButton {
+    font-size: 1rem;
+    padding: 0.875rem 1.5rem;
+  }
+}

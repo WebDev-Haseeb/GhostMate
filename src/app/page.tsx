@@ -10,6 +10,7 @@ import { formatTimeUntilReset } from '@/lib/chatLimitService';
 import { getChat } from '@/lib/chatService';
 import { generateChatId } from '@/lib/chatUtils';
 import RandomConnect from '@/components/RandomConnect';
+import OnboardingTour from '@/components/OnboardingTour';
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -19,6 +20,24 @@ export default function Home() {
   const router = useRouter();
   const [targetId, setTargetId] = useState('');
   const [copied, setCopied] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent flash on initial mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Check if this is the user's first time - go straight to onboarding
+  useEffect(() => {
+    if (user && !authLoading && !idLoading && dailyId) {
+      const hasCompletedOnboarding = localStorage.getItem('ghostmate-onboarding-completed');
+      
+      if (!hasCompletedOnboarding) {
+        setTimeout(() => setShowOnboarding(true), 300);
+      }
+    }
+  }, [user, authLoading, idLoading, dailyId]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -26,14 +45,29 @@ export default function Home() {
     }
   }, [user, authLoading, router]);
 
-  if (authLoading || idLoading) {
+  // Dev helper: Press Shift+R to reset onboarding
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === 'R') {
+        localStorage.removeItem('ghostmate-onboarding-completed');
+        alert('✅ Cache cleared! Refresh (F5) to see onboarding.');
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  // Show loading screen until mounted AND auth/id states are resolved
+  if (!mounted || authLoading || idLoading) {
     return (
       <div className={styles.page}>
         <main className={styles.main}>
           <div className={styles.intro}>
             <div className={styles.loadingSpinner}>
-              <div className={styles.spinner}></div>
-              <p>Loading your anonymous ID...</p>
+              <div className={styles.ghostLoader}>
+                <span>👻</span>
+              </div>
             </div>
           </div>
         </main>
@@ -46,17 +80,23 @@ export default function Home() {
   }
 
   return (
-    <div className={styles.page}>
+    <>
+      {/* Onboarding Tour */}
+      {showOnboarding && (
+        <OnboardingTour onComplete={() => setShowOnboarding(false)} />
+      )}
+
+      <div className={styles.page}>
       <main className={styles.main}>
         <div className={styles.intro}>
           <h1>Welcome to GhostMate</h1>
           <p className={styles.subtitle}>Your anonymous identity for today</p>
 
-          <div className={styles.idCard}>
+          <div className={`${styles.idCard} idCard`}>
             <div className={styles.idHeader}>
               <span className={styles.idLabel}>Your Daily ID</span>
               {timeUntilReset && (
-                <span className={styles.resetTimer}>
+                <span className={`${styles.resetTimer} resetTimer`}>
                   Resets in {String(timeUntilReset.hours).padStart(2, '0')}:
                   {String(timeUntilReset.minutes).padStart(2, '0')}:
                   {String(timeUntilReset.seconds).padStart(2, '0')}
@@ -75,7 +115,7 @@ export default function Home() {
                     {formatDailyId(dailyId)}
                   </div>
                   <button
-                    className={styles.copyButton}
+                    className={`${styles.copyButton} copyButton`}
                     onClick={() => {
                       navigator.clipboard.writeText(dailyId);
                       setCopied(true);
@@ -98,7 +138,7 @@ export default function Home() {
           </div>
 
           {/* Chat Initiation Section */}
-          <div className={styles.chatSection}>
+          <div className={`${styles.chatSection} chatInput`}>
             <h2>Start a Conversation</h2>
             <p className={styles.chatSubtitle}>Enter someone&apos;s daily ID to start chatting</p>
             
@@ -200,7 +240,7 @@ export default function Home() {
           </div>
 
           {/* Random Connect Section */}
-          <div className={styles.randomSection}>
+          <div className={`${styles.randomSection} randomSection`}>
             <h2>Or Try Random Connect</h2>
             <p className={styles.randomSubtitle}>Get paired with a random user instantly</p>
             
@@ -225,5 +265,6 @@ export default function Home() {
         </div>
       </main>
     </div>
+    </>
   );
 }
