@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import PrivacyNoticeModal from '@/components/PrivacyNoticeModal';
 import styles from './login.module.css';
@@ -247,8 +248,17 @@ export default function LandingPage() {
         {/* Footer */}
         <footer className={styles.footer}>
           <p className={styles.footerText}>
-            By continuing, you agree to our privacy policy and confirm you are at least 13 years old.
+            By continuing, you agree to our{' '}
+            <Link href="/privacy" className={styles.footerLink}>Privacy Policy</Link>
+            {' '}and{' '}
+            <Link href="/terms" className={styles.footerLink}>Terms of Use</Link>
+            , and confirm you are at least 13 years old.
           </p>
+          <div className={styles.footerLinks}>
+            <Link href="/privacy" className={styles.legalLink}>Privacy Policy</Link>
+            <span className={styles.separator}>•</span>
+            <Link href="/terms" className={styles.legalLink}>Terms of Use</Link>
+          </div>
           <p className={styles.footerCopyright}>
             © {new Date().getFullYear()} GhostMate. Made with 👻 for anonymous connections.
           </p>

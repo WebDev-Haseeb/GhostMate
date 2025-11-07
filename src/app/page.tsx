@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDailyId } from '@/hooks/useDailyId';
 import { useChatLimit } from '@/hooks/useChatLimit';
-import { formatDailyId } from '@/lib/dailyId';
 import { formatTimeUntilReset } from '@/lib/chatLimitService';
-import { getChat } from '@/lib/chatService';
-import { generateChatId } from '@/lib/chatUtils';
-import RandomConnect from '@/components/RandomConnect';
+import DashboardHeader from '@/components/Dashboard/DashboardHeader';
+import DailyIdCard from '@/components/Dashboard/DailyIdCard';
+import ActivitySummary from '@/components/Dashboard/ActivitySummary';
+import OnlineUsersList from '@/components/Dashboard/OnlineUsersList';
 import OnboardingTour from '@/components/OnboardingTour';
 import styles from "./page.module.css";
 
@@ -18,22 +18,36 @@ export default function Home() {
   const { dailyId, loading: idLoading, error, timeUntilReset } = useDailyId(user?.uid || null);
   const chatLimit = useChatLimit(user?.uid || null);
   const router = useRouter();
-  const [targetId, setTargetId] = useState('');
-  const [copied, setCopied] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   // Prevent flash on initial mount
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Check if this is the user's first time - go straight to onboarding
+  // Stable ready state - only transitions to true once, never back
+  useEffect(() => {
+    if (mounted && !authLoading && !idLoading && (user || !authLoading)) {
+      // Small delay to ensure all states are stable
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [mounted, authLoading, idLoading, user]);
+
+  // Check if this is the user's first time - SUPER PERSISTENT tracking
   useEffect(() => {
     if (user && !authLoading && !idLoading && dailyId) {
-      const hasCompletedOnboarding = localStorage.getItem('ghostmate-onboarding-completed');
+      // Multiple persistence checks for bulletproof tracking
+      const onboardingCompleted = localStorage.getItem('ghostmate-onboarding-completed');
+      const onboardingTimestamp = localStorage.getItem('ghostmate-onboarding-timestamp');
+      const userOnboarding = localStorage.getItem(`ghostmate-onboarding-${user.uid}`);
       
-      if (!hasCompletedOnboarding) {
+      // Check all three flags - if ANY exists, don't show onboarding
+      if (!onboardingCompleted && !onboardingTimestamp && !userOnboarding) {
         setTimeout(() => setShowOnboarding(true), 300);
       }
     }
@@ -49,17 +63,22 @@ export default function Home() {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === 'R') {
+        // Clear all onboarding flags
         localStorage.removeItem('ghostmate-onboarding-completed');
-        alert('✅ Cache cleared! Refresh (F5) to see onboarding.');
+        localStorage.removeItem('ghostmate-onboarding-timestamp');
+        if (user?.uid) {
+          localStorage.removeItem(`ghostmate-onboarding-${user.uid}`);
+        }
+        alert('✅ All onboarding flags cleared! Refresh (F5) to see onboarding.');
       }
     };
     
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+  }, [user]);
 
-  // Show loading screen until mounted AND auth/id states are resolved
-  if (!mounted || authLoading || idLoading) {
+  // Show loading screen until everything is truly ready (no blink!)
+  if (!isReady) {
     return (
       <div className={styles.page}>
         <main className={styles.main}>
@@ -79,192 +98,69 @@ export default function Home() {
     return null; // Redirecting...
   }
 
+  const handleOnboardingComplete = () => {
+    // Set multiple flags for super-persistent tracking
+    localStorage.setItem('ghostmate-onboarding-completed', 'true');
+    localStorage.setItem('ghostmate-onboarding-timestamp', Date.now().toString());
+    if (user?.uid) {
+      localStorage.setItem(`ghostmate-onboarding-${user.uid}`, 'true');
+    }
+    setShowOnboarding(false);
+  };
+
   return (
     <>
       {/* Onboarding Tour */}
       {showOnboarding && (
-        <OnboardingTour onComplete={() => setShowOnboarding(false)} />
+        <OnboardingTour onComplete={handleOnboardingComplete} />
       )}
 
       <div className={styles.page}>
-      <main className={styles.main}>
-        <div className={styles.intro}>
-          <h1>Welcome to GhostMate</h1>
-          <p className={styles.subtitle}>Your anonymous identity for today</p>
+        {/* Dashboard Header */}
+        <DashboardHeader 
+          timeUntilReset={timeUntilReset}
+          onSignOut={signOut}
+        />
 
-          <div className={`${styles.idCard} idCard`}>
-            <div className={styles.idHeader}>
-              <span className={styles.idLabel}>Your Daily ID</span>
-              {timeUntilReset && (
-                <span className={`${styles.resetTimer} resetTimer`}>
-                  Resets in {String(timeUntilReset.hours).padStart(2, '0')}:
-                  {String(timeUntilReset.minutes).padStart(2, '0')}:
-                  {String(timeUntilReset.seconds).padStart(2, '0')}
-                </span>
-              )}
+        <main className={styles.main}>
+          <div className={styles.container}>
+            {/* Welcome Section */}
+            <div className={styles.welcomeSection}>
+              <h1 className={styles.welcomeTitle}>Welcome to GhostMate</h1>
+              <p className={styles.welcomeSubtitle}>
+                Your anonymous, ephemeral connection platform
+              </p>
             </div>
 
-              {error ? (
-                <div className={styles.error}>
-                  <p>Failed to load ID</p>
-                  <span>{error}</span>
-                </div>
-              ) : dailyId ? (
-                <div className={styles.dailyIdWrapper}>
-                  <div className={styles.dailyId}>
-                    {formatDailyId(dailyId)}
-                  </div>
-                  <button
-                    className={`${styles.copyButton} copyButton`}
-                    onClick={() => {
-                      navigator.clipboard.writeText(dailyId);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    }}
-                    title="Copy ID"
-                  >
-                    {copied ? '✓' : '📋'}
-                  </button>
-                </div>
-              ) : (
-                <div className={styles.dailyId}>
-                  ---- ----
-                </div>
-              )}
+            {/* Dashboard Grid */}
+            <div className={styles.dashboardGrid}>
+              {/* Top Row - ID Card (Left) & Online Users (Right) */}
+              <div className={styles.primaryColumn}>
+                <DailyIdCard
+                  dailyId={dailyId}
+                  loading={idLoading}
+                  error={error}
+                />
 
-            <p className={styles.idDescription}>
-              This ID resets at midnight PKT and is completely anonymous
-            </p>
-          </div>
-
-          {/* Chat Initiation Section */}
-          <div className={`${styles.chatSection} chatInput`}>
-            <h2>Start a Conversation</h2>
-            <p className={styles.chatSubtitle}>Enter someone&apos;s daily ID to start chatting</p>
-            
-            <div className={styles.chatForm}>
-              <input
-                type="text"
-                placeholder="Enter 8-digit ID"
-                value={targetId}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 8);
-                  setTargetId(value);
-                }}
-                maxLength={8}
-                className={styles.chatInput}
-                disabled={chatLimit.isLimitReached}
-              />
-              
-                  <button
-                    onClick={async () => {
-                      // Validation checks
-                      if (!targetId || targetId.length !== 8) {
-                        alert('Please enter a valid 8-digit ID');
-                        return;
-                      }
-                      
-                      if (!dailyId) {
-                        alert('Your ID is not ready yet. Please wait...');
-                        return;
-                      }
-                      
-                      if (targetId === dailyId) {
-                        alert('You cannot chat with yourself!');
-                        return;
-                      }
-                      
-                      try {
-                        // ✅ NEW: Validate that the other daily ID exists in Firestore
-                        const { getUserIdFromDailyId } = await import('@/lib/dailyIdService');
-                        const otherUserId = await getUserIdFromDailyId(targetId);
-                        
-                        if (!otherUserId) {
-                          alert('⚠️ This Daily ID does not exist or has expired.\n\nPlease check the ID and try again.');
-                          return;
-                        }
-
-                        // Check if chat already exists
-                        const chatId = generateChatId(dailyId, targetId);
-                        const existingChat = await getChat(chatId);
-                        
-                        if (existingChat) {
-                          // Chat already exists - navigate without incrementing limit
-                          router.push(`/chat/${targetId}`);
-                        } else {
-                          // New chat - increment limit before navigating
-                          const result = await chatLimit.recordChatInitiation();
-                          
-                          if (result.success) {
-                            router.push(`/chat/${targetId}`);
-                          } else {
-                            alert(result.message || 'Failed to start chat');
-                          }
-                        }
-                      } catch (error) {
-                        console.error('Error checking chat:', error);
-                        alert('Failed to start chat. Please try again.');
-                      }
-                    }}
-                disabled={chatLimit.isLimitReached || !targetId || targetId.length !== 8}
-                className={styles.startChatButton}
-              >
-                {chatLimit.isLimitReached ? 'Limit Reached' : 'Start Chat'}
-              </button>
-            </div>
-            
-            {/* Chat Limit Status */}
-            <div className={styles.limitStatus}>
-              <div className={styles.limitInfo}>
-                <span className={styles.limitLabel}>Today&apos;s chats:</span>
-                <span className={styles.limitCount}>
-                  {chatLimit.count} / {chatLimit.limit}
-                </span>
+                <OnlineUsersList
+                  currentUserId={user?.uid || null}
+                  currentDailyId={dailyId}
+                  chatLimit={chatLimit}
+                />
               </div>
-              
-              {chatLimit.isLimitReached && (
-                <div className={styles.limitReached}>
-                  <p>⏰ Daily limit reached!</p>
-                  <p className={styles.resetInfo}>
-                    Resets in {formatTimeUntilReset(chatLimit.timeUntilReset)}
-                  </p>
-                </div>
-              )}
-              
-              {!chatLimit.isLimitReached && chatLimit.remaining <= 2 && chatLimit.remaining > 0 && (
-                <div className={styles.limitWarning}>
-                  <p>⚠️ Only {chatLimit.remaining} chat{chatLimit.remaining === 1 ? '' : 's'} remaining today</p>
-                </div>
-              )}
+
+              {/* Bottom Row - Activity Stats (Full Width) */}
+              <ActivitySummary
+                chatsUsed={chatLimit.count}
+                chatsLimit={chatLimit.limit}
+                timeUntilReset={formatTimeUntilReset(chatLimit.timeUntilReset)}
+                userId={user?.uid}
+                dailyId={dailyId}
+              />
             </div>
           </div>
-
-          {/* Random Connect Section */}
-          <div className={`${styles.randomSection} randomSection`}>
-            <h2>Or Try Random Connect</h2>
-            <p className={styles.randomSubtitle}>Get paired with a random user instantly</p>
-            
-            <RandomConnect 
-              userId={user?.uid || null}
-              userDailyId={dailyId}
-            />
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className={styles.navButtons}>
-            <button 
-              onClick={() => router.push('/stories')} 
-              className={styles.storiesButton}
-            >
-              ✨ Featured Stories
-            </button>
-            <button onClick={signOut} className={styles.signOutButton}>
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
     </>
   );
 }

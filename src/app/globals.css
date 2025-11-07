@@ -199,6 +199,50 @@ body {
   }
 }
 
+/* Custom Text Selection */
+::selection {
+  background: var(--accent-primary);
+  color: white;
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: var(--accent-primary);
+  color: white;
+  text-shadow: none;
+}
+
+/* Custom Scrollbar - Wider, No Arrows */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+
+/* Hide scrollbar arrows */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-primary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 10px;
+  border: 2px solid var(--background-primary);
+  transition: all var(--transition-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--accent-primary);
+}
+
 /* Print Styles */
 @media print {
   * {

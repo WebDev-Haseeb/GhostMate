@@ -1,0 +1,238 @@
+/* Dashboard Header - Glassmorphism Design */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  width: 100%;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(26, 26, 46, 0.8);
+  border-bottom: 1px solid rgba(123, 104, 238, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+/* Brand Section */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.logo {
+  font-size: 1.75rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* Countdown Timer */
+.countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(123, 104, 238, 0.1);
+  border: 1px solid rgba(123, 104, 238, 0.3);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all var(--transition-base);
+}
+
+.countdown:hover {
+  background: rgba(123, 104, 238, 0.15);
+  border-color: rgba(123, 104, 238, 0.4);
+  transform: translateY(-2px);
+}
+
+.countdownLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--foreground-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.countdownTime {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent-secondary);
+}
+
+.timeUnit {
+  min-width: 2ch;
+  text-align: center;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.separator {
+  color: var(--foreground-tertiary);
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes blink {
+  0%, 49%, 100% { opacity: 1; }
+  50%, 99% { opacity: 0.3; }
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(123, 104, 238, 0.1);
+  border: 1px solid rgba(123, 104, 238, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--foreground-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.navButton:hover {
+  background: rgba(123, 104, 238, 0.2);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(123, 104, 238, 0.3);
+}
+
+.navButton:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.navButton:active {
+  transform: translateY(0);
+}
+
+.navIcon {
+  font-size: 1.25rem;
+}
+
+.navText {
+  font-family: var(--font-body);
+}
+
+.signOutButton {
+  background: rgba(255, 82, 82, 0.1);
+  border-color: rgba(255, 82, 82, 0.3);
+}
+
+.signOutButton:hover {
+  background: rgba(255, 82, 82, 0.2);
+  border-color: rgba(255, 82, 82, 0.5);
+  box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-sm) var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .title {
+    display: none; /* Hide text on mobile, keep logo */
+  }
+
+  .countdown {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .countdownLabel {
+    font-size: 0.65rem;
+  }
+
+  .countdownTime {
+    font-size: 1rem;
+  }
+
+  .navText {
+    display: none; /* Show only icons on mobile */
+  }
+
+  .navButton {
+    padding: var(--space-sm);
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .navIcon {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .countdown {
+    order: 3;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .container {
+    flex-wrap: wrap;
+  }
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo,
+  .timeUnit,
+  .separator {
+    animation: none;
+  }
+
+  .navButton:hover,
+  .countdown:hover {
+    transform: none;
+  }
+}
+
