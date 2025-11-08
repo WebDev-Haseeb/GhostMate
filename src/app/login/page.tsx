@@ -42,24 +42,12 @@ export default function LandingPage() {
   };
 
 
-  // Show loading while checking auth state
-  if (authLoading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingScreen}>
-          <div className={styles.ghostLoader}>
-            <img src="/favicon.svg" alt="Loading" />
-          </div>
-          <p>Loading GhostMate...</p>
-        </div>
-      </div>
-    );
-  }
-
   // If user is signed in, show nothing (redirecting)
   if (user) {
     return null;
   }
+
+  const isAuthenticating = authLoading || loading;
 
   return (
     <>
@@ -100,13 +88,13 @@ export default function LandingPage() {
 
             <button
               onClick={handleSignIn}
-              disabled={!privacyAccepted || loading}
+              disabled={!privacyAccepted || isAuthenticating}
               className={styles.ctaButton}
             >
-              {loading ? (
+              {isAuthenticating ? (
                 <span className={styles.loadingText}>
                   <span className={styles.spinner}></span>
-                  Connecting...
+                  {authLoading ? 'Checking session...' : 'Connecting...'}
                 </span>
               ) : (
                 <>

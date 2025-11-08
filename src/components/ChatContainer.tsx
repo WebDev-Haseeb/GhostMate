@@ -6,11 +6,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDailyId } from '@/hooks/useDailyId';
 import { useChat } from '@/hooks/useChat';
 import { useHighlights } from '@/hooks/useHighlights';
+import { useTimeUntilReset } from '@/hooks/useTimeUntilReset';
 import { getUserIdFromDailyId } from '@/lib/dailyIdService';
 import { generateChatId } from '@/lib/chatUtils';
 import ChatWindow from './ChatWindow';
 import ChatInput from './ChatInput';
-import PurgeWarning from './PurgeWarning';
 import FavoriteButton from './FavoriteButton';
 import styles from './ChatContainer.module.css';
 
@@ -22,6 +22,7 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { dailyId, loading: idLoading } = useDailyId(user?.uid || null);
+  const timeUntilReset = useTimeUntilReset();
   const { 
     messages, 
     loading: chatLoading, 
@@ -88,13 +89,15 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
     }
   }, [user, authLoading, router]);
 
-  // Loading state
+  // Loading state - MATCHING DASHBOARD
   if (authLoading || idLoading || chatLoading || otherUserIdLoading) {
     return (
       <div className={styles.container}>
         <div className={styles.loading}>
-          <div className={styles.spinner}>
-            <img src="/favicon.svg" alt="Loading" />
+          <div className={styles.loadingSpinner}>
+            <div className={styles.spinner}>
+              <img src="/favicon.svg" alt="Loading" />
+            </div>
           </div>
           <p>Loading chat...</p>
         </div>
@@ -147,31 +150,34 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <div className={styles.header}>
+      <header className={styles.header}>
         <button 
           className={styles.backButton}
           onClick={() => router.push('/')}
-          aria-label="Go back"
+          aria-label="Back to dashboard"
         >
           ← Back
         </button>
         <div className={styles.chatInfo}>
-          <h2>Chat with {otherDailyId}</h2>
-          <span className={styles.subtitle}>One-to-one conversation</span>
+          <h2>Anonymous Chat</h2>
+          <div className={styles.subtitle}>
+            <span className={styles.statusIndicator}></span>
+            ID: {otherDailyId}
+          </div>
         </div>
-            <div className={styles.favoriteSection}>
-              <FavoriteButton
-                userId={user?.uid || null}
-                userDailyId={dailyId}
-                targetDailyId={otherDailyId}
-              />
-            </div>
-      </div>
+        <div className={styles.resetTime}>
+          🕐 {timeUntilReset}
+        </div>
+        <div className={styles.favoriteSection}>
+          <FavoriteButton
+            userId={user?.uid || null}
+            userDailyId={dailyId}
+            targetDailyId={otherDailyId}
+          />
+        </div>
+      </header>
 
-      {/* Purge Warning */}
-      <div className={styles.warningContainer}>
-        <PurgeWarning />
-      </div>
+      {/* Removed PurgeWarning - reset time now in header */}
 
       {/* Chat Window */}
       <ChatWindow 

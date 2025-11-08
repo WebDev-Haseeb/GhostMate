@@ -2,9 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { Message } from '@/types/chat';
-import { formatMessageTime } from '@/lib/chatUtils';
-import HighlightButton from './HighlightButton';
 import type { MessageHighlightStatus } from '@/types/highlights';
+import HighlightButton from './HighlightButton';
 import styles from './ChatWindow.module.css';
 
 interface ChatWindowProps {
@@ -33,6 +32,30 @@ export default function ChatWindow({
   // Check if highlighting is enabled
   const highlightingEnabled = Boolean(userId && otherUserId && chatId && onToggleHighlight);
 
+  const getRelativeTime = (timestamp: number) => {
+    const now = Date.now();
+    const diff = Math.max(0, now - timestamp);
+
+    const minutes = Math.floor(diff / (1000 * 60));
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
+
+    const weeks = Math.floor(days / 7);
+    if (weeks < 4) return `${weeks} week${weeks === 1 ? '' : 's'} ago`;
+
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
+
+    const years = Math.floor(days / 365);
+    return `${years} year${years === 1 ? '' : 's'} ago`;
+  };
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -53,12 +76,9 @@ export default function ChatWindow({
   return (
     <div className={styles.chatWindow}>
       <div className={styles.messagesContainer}>
-        {messages.map((message, index) => {
+        {messages.map((message) => {
           const isMyMessage = message.senderId === myDailyId;
           const isSystem = message.isSystemMessage;
-          const showTimestamp = 
-            index === 0 || 
-            (messages[index - 1].timestamp - message.timestamp) > 60000; // 1 min gap
 
           if (isSystem) {
             return (
@@ -66,11 +86,6 @@ export default function ChatWindow({
                 <div className={styles.systemBubble}>
                   <p>{message.text}</p>
                 </div>
-                {showTimestamp && (
-                  <div className={styles.systemTimestamp}>
-                    {formatMessageTime(message.timestamp)}
-                  </div>
-                )}
               </div>
             );
           }
@@ -90,24 +105,23 @@ export default function ChatWindow({
             <div
               key={message.id}
               className={`${styles.messageWrapper} ${isMyMessage ? styles.myMessage : styles.theirMessage}`}
+              title={getRelativeTime(message.timestamp)}
             >
-              {showTimestamp && (
-                <div className={styles.timestamp}>
-                  {formatMessageTime(message.timestamp)}
-                </div>
-              )}
+              <div className={styles.timestamp}>
+                {getRelativeTime(message.timestamp)}
+              </div>
               <div className={styles.bubble}>
                 <p>{message.text}</p>
-                {highlightingEnabled && (
-                  <div className={styles.highlightButtonContainer}>
-                    <HighlightButton
-                      messageId={message.id}
-                      status={highlightStatus}
-                      onToggle={() => onToggleHighlight!(message.id, message)}
-                    />
-                  </div>
-                )}
               </div>
+              {highlightingEnabled && (
+                <div className={styles.highlightButtonContainer}>
+                  <HighlightButton
+                    messageId={message.id}
+                    status={highlightStatus}
+                    onToggle={() => onToggleHighlight!(message.id, message)}
+                  />
+                </div>
+              )}
             </div>
           );
         })}

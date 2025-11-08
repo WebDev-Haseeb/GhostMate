@@ -1,43 +1,46 @@
+/* Simple Chat Input - Clean Design */
 .chatInput {
+  position: relative;
+  margin: 0;
+  padding: var(--space-lg);
+  background: rgba(26, 26, 46, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(123, 104, 238, 0.35);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 24px 55px rgba(8, 8, 16, 0.55);
   display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
+  gap: var(--space-lg);
+  align-items: center;
+  width: 100%;
+  cursor: text;
 }
 
 .inputWrapper {
   flex: 1;
   position: relative;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-sm) var(--spacing-md);
-  transition: border-color 0.2s ease;
-}
-
-.inputWrapper:focus-within {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.1);
+  min-height: 72px;
 }
 
 .textarea {
   width: 100%;
-  background: transparent;
-  border: none;
+  background: rgba(26, 26, 46, 0.8);
+  border: 1px solid rgba(123, 104, 238, 0.35);
+  border-radius: var(--radius-lg);
   outline: none;
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  font-family: var(--font-family);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.05rem;
+  font-family: var(--font-body);
+  line-height: 1.6;
   resize: none;
-  min-height: 24px;
-  max-height: 120px;
+  padding: var(--space-md) var(--space-lg);
+  min-height: 72px;
+  max-height: 240px;
   overflow-y: auto;
-  line-height: 1.5;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .textarea::placeholder {
-  color: var(--text-tertiary);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .textarea:disabled {
@@ -45,7 +48,13 @@
   cursor: not-allowed;
 }
 
-/* Custom scrollbar for textarea */
+.textarea:focus {
+  border-color: rgba(123, 104, 238, 0.35);
+  background: rgba(26, 26, 46, 0.8);
+  outline: none;
+}
+
+/* Custom scrollbar */
 .textarea::-webkit-scrollbar {
   width: 4px;
 }
@@ -55,39 +64,49 @@
 }
 
 .textarea::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: var(--radius-full);
+  background: rgba(123, 104, 238, 0.4);
+  border-radius: 10px;
 }
 
 .charCount {
   position: absolute;
-  bottom: 4px;
-  right: 8px;
+  bottom: 12px;
+  right: 18px;
   font-size: 0.7rem;
-  color: var(--text-tertiary);
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-mono);
+  font-weight: 500;
   pointer-events: none;
 }
 
+/* Send Button - Right side with better icon */
 .sendButton {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  border: none;
+  background: linear-gradient(135deg, rgba(123, 104, 238, 0.45), rgba(155, 136, 255, 0.55));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(123, 104, 238, 0.55);
   border-radius: var(--radius-lg);
-  color: white;
-  font-size: 1.2rem;
+  color: #ffffff;
+  font-size: 1.15rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3);
+  transition: all var(--transition-base);
+  box-shadow: 0 6px 16px rgba(123, 104, 238, 0.35);
+}
+
+.sendButton:focus {
+  outline: none;
 }
 
 .sendButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4);
+  background: linear-gradient(135deg, rgba(123, 104, 238, 0.6), rgba(155, 136, 255, 0.75));
+  border-color: rgba(123, 104, 238, 0.75);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 24px rgba(123, 104, 238, 0.45);
 }
 
 .sendButton:active:not(:disabled) {
@@ -95,14 +114,15 @@
 }
 
 .sendButton:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .spinner {
   display: inline-block;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -114,19 +134,19 @@
   }
 }
 
-/* Mobile responsiveness */
+/* Mobile optimizations */
 @media (max-width: 768px) {
   .chatInput {
-    padding: var(--spacing-sm);
-  }
-
-  .sendButton {
-    width: 44px;
-    height: 44px;
+    padding: var(--space-md) var(--space-lg);
   }
 
   .textarea {
-    font-size: 16px; /* Prevents iOS zoom on focus */
+    font-size: 16px; /* Prevent zoom on iOS */
+    min-height: 64px;
+  }
+
+  .sendButton {
+    width: 48px;
+    height: 48px;
   }
 }
-

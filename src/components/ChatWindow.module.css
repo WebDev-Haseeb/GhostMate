@@ -1,24 +1,32 @@
+/* Chat Window - Clean & Premium */
 .chatWindow {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
+  min-height: 0;
   overflow: hidden;
 }
 
 .messagesContainer {
   flex: 1;
-  padding: var(--spacing-lg);
+  padding: var(--space-lg) var(--space-xl);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--space-xs);
   scroll-behavior: smooth;
+  min-height: 0;
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
-/* Custom scrollbar */
 .messagesContainer::-webkit-scrollbar {
-  width: 6px;
+  display: none; /* WebKit */
+}
+
+/* Custom scrollbar matching dashboard */
+.messagesContainer::-webkit-scrollbar {
+  width: 8px;
 }
 
 .messagesContainer::-webkit-scrollbar-track {
@@ -26,20 +34,46 @@
 }
 
 .messagesContainer::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: var(--radius-full);
+  background: rgba(123, 104, 238, 0.3);
+  border-radius: 10px;
 }
 
 .messagesContainer::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-primary);
+  background: rgba(123, 104, 238, 0.5);
 }
 
-/* Message wrapper */
+/* Message Row - Contains bubble + action buttons */
 .messageWrapper {
   display: flex;
-  flex-direction: column;
-  animation: fadeSlideIn 0.3s ease-out;
-  max-width: 80%;
+  align-items: center;
+  gap: var(--space-xs);
+  animation: fadeSlideIn 0.4s ease-out;
+  max-width: 70%;
+  position: relative;
+}
+
+.timestamp {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translate(-50%, 6px);
+  background: rgba(16, 16, 32, 0.9);
+  padding: var(--space-xxs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(8, 8, 16, 0.6);
+}
+
+.messageWrapper:hover .timestamp {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 @keyframes fadeSlideIn {
@@ -53,79 +87,153 @@
   }
 }
 
+/* My messages - right side with buttons on left */
 .myMessage {
   align-self: flex-end;
-  align-items: flex-end;
+  flex-direction: row-reverse;
 }
 
+/* Their messages - left side with buttons on right */
 .theirMessage {
   align-self: flex-start;
-  align-items: flex-start;
+  flex-direction: row;
 }
 
-/* Timestamp */
+/* Timestamp tooltip */
 .timestamp {
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
-  margin-bottom: var(--spacing-xs);
-  padding: 0 var(--spacing-sm);
-  text-align: center;
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translate(-50%, 6px);
+  background: rgba(16, 16, 32, 0.9);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(8, 8, 16, 0.6);
 }
 
-/* Message bubble */
+.messageWrapper:hover .timestamp {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Message Bubble - Clean & Simple */
 .bubble {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-lg);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 14px;
   word-wrap: break-word;
-  overflow-wrap: break-word;
   max-width: 100%;
+  transition: all var(--transition-base);
   position: relative;
-  transition: transform 0.2s ease;
-}
-
-.bubble:hover {
-  transform: translateY(-2px);
 }
 
 .bubble p {
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.5;
+  color: inherit;
 }
 
-/* My message styling */
+/* My message - Purple gradient */
 .myMessage .bubble {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  color: white;
-  border-bottom-right-radius: var(--radius-sm);
-  box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3);
+  background: linear-gradient(135deg, rgba(123, 104, 238, 0.3), rgba(155, 136, 255, 0.4));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(123, 104, 238, 0.4);
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 12px rgba(123, 104, 238, 0.25);
 }
 
-/* Their message styling */
+.myMessage .bubble:hover {
+  border-color: rgba(123, 104, 238, 0.6);
+  box-shadow: 0 4px 16px rgba(123, 104, 238, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Their message - Glassmorphism */
 .theirMessage .bubble {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-bottom-left-radius: var(--radius-sm);
+  background: rgba(26, 26, 46, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(123, 104, 238, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Empty state */
+.theirMessage .bubble:hover {
+  background: rgba(26, 26, 46, 0.6);
+  border-color: rgba(123, 104, 238, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Action Buttons - Horizontal on side */
+.highlightButtonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: var(--space-xs);
+}
+
+.myMessage .highlightButtonContainer {
+  margin-left: 0;
+  margin-right: var(--space-xs);
+}
+
+/* System Messages - Clean format */
+.systemMessageWrapper {
+  align-self: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--space-md) 0;
+}
+
+.systemBubble {
+  background: rgba(123, 104, 238, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(123, 104, 238, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm) var(--space-lg);
+  text-align: center;
+  max-width: 70%;
+  box-shadow: 0 2px 12px rgba(123, 104, 238, 0.2);
+}
+
+.systemBubble p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+}
+
+/* Empty State */
 .emptyState {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-md);
-  color: var(--text-tertiary);
-  padding: var(--spacing-xl);
+  gap: var(--space-lg);
+  padding: var(--space-2xl);
   text-align: center;
 }
 
 .ghostIcon {
-  font-size: 4rem;
-  animation: float 3s ease-in-out infinite;
   opacity: 0.5;
+  animation: float 3s ease-in-out infinite;
+}
+
+.ghostIcon img {
+  width: 4rem;
+  height: 4rem;
 }
 
 @keyframes float {
@@ -139,79 +247,14 @@
 
 .emptyState p {
   font-size: 1.1rem;
-  color: var(--text-secondary);
+  color: var(--foreground-secondary);
   margin: 0;
+  font-weight: 600;
 }
 
 .emptyState span {
   font-size: 0.9rem;
-  color: var(--text-tertiary);
-}
-
-/* System message styling */
-.systemMessageWrapper {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: var(--spacing-md) 0;
-}
-
-.systemBubble {
-  background: rgba(138, 43, 226, 0.1);
-  border: 1px solid rgba(138, 43, 226, 0.3);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--radius-lg);
-  max-width: 80%;
-  text-align: center;
-}
-
-.systemBubble p {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  font-style: italic;
-}
-
-.systemTimestamp {
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
-  margin-top: var(--spacing-xs);
-  text-align: center;
-}
-
-/* Highlight button container */
-.highlightButtonContainer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-top: var(--spacing-xs);
-  padding-top: var(--spacing-xs);
-  opacity: 1;  /* Always show - changed from 0 */
-  transition: opacity 0.2s ease;
-}
-
-/* Desktop: show on hover for not-highlighted messages, always show for highlighted */
-@media (min-width: 769px) {
-  .highlightButtonContainer {
-    opacity: 0;  /* Hide by default on desktop */
-  }
-  
-  .bubble:hover .highlightButtonContainer {
-    opacity: 1;  /* Show on hover */
-  }
-  
-  /* Always show when message is highlighted by anyone */
-  .bubble:has(.highlightButtonContainer button:not([class*="notHighlighted"])) .highlightButtonContainer {
-    opacity: 1;
-  }
-}
-
-/* Always show highlight button on mobile */
-@media (max-width: 768px) {
-  .highlightButtonContainer {
-    opacity: 1;
-  }
+  color: var(--foreground-tertiary);
 }
 
 /* Mobile responsiveness */
@@ -221,17 +264,17 @@
   }
 
   .messagesContainer {
-    padding: var(--spacing-md);
+    padding: var(--space-md) var(--space-lg);
+    gap: var(--space-xs);
   }
 
   .bubble {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--space-xs) var(--space-md);
     font-size: 0.9rem;
   }
   
   .systemBubble {
-    max-width: 90%;
+    max-width: 85%;
     font-size: 0.8rem;
   }
 }
-

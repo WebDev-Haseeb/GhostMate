@@ -15,6 +15,7 @@ import {
   listenToMessageHighlightStatus,
   getUserHighlight
 } from '@/lib/highlightsService';
+import { sendSystemMessage } from '@/lib/chatService';
 import type {
   MessageHighlightStatus,
   CreateHighlightInput
@@ -112,6 +113,11 @@ export function useHighlights({
           
           if (!result.success) {
             setError(result.message || 'Failed to remove highlight');
+          } else {
+            await sendSystemMessage(
+              chatId,
+              `☆ ${myDailyId} removed a highlight`
+            );
           }
         } else {
           // Add highlight
@@ -131,6 +137,11 @@ export function useHighlights({
 
           if (!result.success) {
             setError(result.message || 'Failed to add highlight');
+          } else {
+            await sendSystemMessage(
+              chatId,
+              `⭐ ${myDailyId} highlighted a message`
+            );
           }
           // Note: Mutual highlights are automatically queued for admin review
         }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, KeyboardEvent } from 'react';
+import { useState, FormEvent, KeyboardEvent, useRef, useEffect } from 'react';
 import styles from './ChatInput.module.css';
 
 interface ChatInputProps {
@@ -15,22 +15,42 @@ export default function ChatInput({
   placeholder = "Type a message..." 
 }: ChatInputProps) {
   const [text, setText] = useState('');
-  const [sending, setSending] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const refocusTextarea = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.focus();
+      const length = textarea.value.length;
+      textarea.setSelectionRange(length, length);
+    }
+  };
+
+  const scheduleRefocus = () => {
+    requestAnimationFrame(refocusTextarea);
+  };
+
+  useEffect(() => {
+    scheduleRefocus();
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     const trimmedText = text.trim();
-    if (!trimmedText || sending || disabled) return;
+    if (!trimmedText || disabled) return;
+
+    const previousText = trimmedText;
 
     try {
-      setSending(true);
-      await onSend(trimmedText);
       setText('');
+      scheduleRefocus();
+      await onSend(trimmedText);
     } catch (error) {
       console.error('Failed to send message:', error);
+      setText(previousText);
     } finally {
-      setSending(false);
+      scheduleRefocus();
     }
   };
 
@@ -43,35 +63,38 @@ export default function ChatInput({
 
   const isValid = text.trim().length > 0 && text.trim().length <= 1000;
 
+  const handleContainerClick = (e: React.MouseEvent<HTMLFormElement>) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    refocusTextarea();
+  };
+
   return (
-    <form className={styles.chatInput} onSubmit={handleSubmit}>
+    <form className={styles.chatInput} onSubmit={handleSubmit} onClick={handleContainerClick}>
+      <button
+        type="submit"
+        disabled={!isValid || disabled}
+        className={styles.sendButton}
+        aria-label="Send message"
+      >
+        <span>➤</span>
+      </button>
       <div className={styles.inputWrapper}>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          disabled={disabled || sending}
+          disabled={disabled}
           className={styles.textarea}
           rows={1}
           maxLength={1000}
+          ref={textareaRef}
+          autoFocus
         />
         <div className={styles.charCount}>
           {text.length}/1000
         </div>
       </div>
-      <button
-        type="submit"
-        disabled={!isValid || disabled || sending}
-        className={styles.sendButton}
-        aria-label="Send message"
-      >
-        {sending ? (
-          <span className={styles.spinner}>⏳</span>
-        ) : (
-          <span>📤</span>
-        )}
-      </button>
     </form>
   );
 }
