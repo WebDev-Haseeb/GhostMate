@@ -44,7 +44,6 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
     if (!currentUserId || !currentDailyId) {
       setOnlineUsers([]);
       setLoading(false);
-      setRefreshing(false);
       return;
     }
 
