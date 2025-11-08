@@ -9,7 +9,6 @@
  */
 
 import {
-  getFirestore,
   doc,
   getDoc,
   setDoc,
@@ -23,7 +22,7 @@ import {
   onSnapshot,
   Unsubscribe
 } from 'firebase/firestore';
-import app from './firebase';
+import { db } from './firebase';
 import { getNextMidnight } from './dailyId';
 import type {
   MessageHighlight,
@@ -33,8 +32,6 @@ import type {
   MessageHighlightStatus,
   UserHighlights
 } from '@/types/highlights';
-
-const db = getFirestore(app);
 
 /**
  * Generate a unique story ID from chat and message IDs

@@ -153,8 +153,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
   background: rgba(123, 104, 238, 0.15);
   border: 1px solid rgba(123, 104, 238, 0.4);
@@ -170,12 +169,7 @@
 .actionButton:hover:not(:disabled) {
   background: rgba(123, 104, 238, 0.25);
   border-color: var(--accent-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(123, 104, 238, 0.4);
-}
-
-.actionButton:active:not(:disabled) {
-  transform: translateY(0);
+  box-shadow: 0 4px 18px rgba(123, 104, 238, 0.35);
 }
 
 .actionButton.success {
@@ -190,12 +184,40 @@
 }
 
 .buttonIcon {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  background: rgba(123, 104, 238, 0.2);
+  border: 1px solid rgba(123, 104, 238, 0.3);
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.12);
 }
 
-.buttonText {
+.iconSuccess {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.buttonTextGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.buttonPrimaryText {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground-primary);
+}
+
+.buttonSecondaryText {
+  font-size: 0.8rem;
+  color: rgba(226, 232, 240, 0.65);
 }
 
 /* Card Footer */

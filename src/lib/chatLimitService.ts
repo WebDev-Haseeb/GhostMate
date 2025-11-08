@@ -3,11 +3,9 @@
  * Enforces the 5 chats per day limit for each user
  */
 
-import { getFirestore, doc, getDoc, updateDoc, setDoc, runTransaction } from 'firebase/firestore';
-import app from './firebase';
+import { doc, getDoc, updateDoc, setDoc, runTransaction } from 'firebase/firestore';
+import { db } from './firebase';
 import { getTodayMidnight, getTimeUntilMidnight } from './dailyId';
-
-const db = getFirestore(app);
 
 export interface ChatLimitData {
   userId: string;

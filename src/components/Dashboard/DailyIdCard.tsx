@@ -109,8 +109,13 @@ https://ghostmate.online
                 disabled={copied}
                 aria-label="Copy Daily ID"
               >
-                <span className={styles.buttonIcon}>{copied ? '✓' : '📋'}</span>
-                <span className={styles.buttonText}>{copied ? 'Copied!' : 'Copy'}</span>
+                <span className={`${styles.buttonIcon} ${copied ? styles.iconSuccess : ''}`}>
+                  {copied ? '✅' : '📋'}
+                </span>
+                <div className={styles.buttonTextGroup}>
+                  <span className={styles.buttonPrimaryText}>{copied ? 'ID Copied' : 'Copy ID'}</span>
+                  <span className={styles.buttonSecondaryText}>{copied ? 'Ready to share' : 'Instant copy to clipboard'}</span>
+                </div>
               </button>
 
               <button
@@ -119,8 +124,13 @@ https://ghostmate.online
                 disabled={shared}
                 aria-label="Share Daily ID"
               >
-                <span className={styles.buttonIcon}>{shared ? '✓' : '📤'}</span>
-                <span className={styles.buttonText}>{shared ? 'Shared!' : 'Share'}</span>
+                <span className={`${styles.buttonIcon} ${shared ? styles.iconSuccess : ''}`}>
+                  {shared ? '✅' : '🔗'}
+                </span>
+                <div className={styles.buttonTextGroup}>
+                  <span className={styles.buttonPrimaryText}>{shared ? 'Shared!' : 'Share Link'}</span>
+                  <span className={styles.buttonSecondaryText}>{shared ? 'Sent to your friend' : 'Send invite or copy template'}</span>
+                </div>
               </button>
             </div>
           </>

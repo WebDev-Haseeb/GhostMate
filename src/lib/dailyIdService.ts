@@ -3,11 +3,9 @@
  * Manages the lifecycle of daily anonymous IDs
  */
 
-import { getFirestore, doc, getDoc, setDoc, query, collection, where, getDocs } from 'firebase/firestore';
-import app from './firebase';
+import { doc, getDoc, setDoc, query, collection, where, getDocs } from 'firebase/firestore';
 import { generateDailyId, getTodayMidnight, getNextMidnight, isIdExpired } from './dailyId';
-
-const db = getFirestore(app);
+import { db } from './firebase';
 
 export interface DailyIdRecord {
   dailyId: string;

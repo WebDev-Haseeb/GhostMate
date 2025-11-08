@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, query, where, getDocs, doc, setDoc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, Timestamp, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { formatDailyId } from '@/lib/dailyId';
 import { getChat } from '@/lib/chatService';
@@ -33,9 +33,88 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
   const router = useRouter();
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [connectingTo, setConnectingTo] = useState<string | null>(null);
   const [randomConnecting, setRandomConnecting] = useState(false);
+
+  const presenceDataRef = useRef<any[]>([]);
+  const dailyDataRef = useRef<any[]>([]);
+  const readinessRef = useRef<{ presence: boolean; daily: boolean }>({ presence: false, daily: false });
+
+  const computeOnlineUsers = useCallback(() => {
+    if (!currentUserId || !currentDailyId) {
+      setOnlineUsers([]);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
+    const { presence, daily } = readinessRef.current;
+    if (!presence || !daily) {
+      return;
+    }
+
+    const now = Date.now();
+    const STALE_THRESHOLD = 180000; // 3 minutes to tolerate background tab throttling
+
+    const onlineUserIds = new Set<string>();
+    presenceDataRef.current.forEach((entry: any) => {
+      const userId = entry.userId;
+      const lastSeenValue = entry.lastSeen?.toMillis
+        ? entry.lastSeen.toMillis()
+        : typeof entry.lastSeen === 'number'
+          ? entry.lastSeen
+          : entry.lastSeen?.toDate
+            ? entry.lastSeen.toDate().getTime()
+            : 0;
+
+      if (
+        userId &&
+        userId !== currentUserId &&
+        now - lastSeenValue < STALE_THRESHOLD
+      ) {
+        onlineUserIds.add(userId);
+      }
+    });
+
+    const users: OnlineUser[] = dailyDataRef.current
+      .map((entry: any) => {
+        const expiresAt = entry.expiresAt;
+        let expiresAtMillis = 0;
+        if (expiresAt instanceof Timestamp) {
+          expiresAtMillis = expiresAt.toMillis();
+        } else if (typeof expiresAt === 'number') {
+          expiresAtMillis = expiresAt;
+        } else if (expiresAt?.toDate) {
+          expiresAtMillis = expiresAt.toDate().getTime();
+        }
+
+        return {
+          userId: entry.userId,
+          dailyId: entry.dailyId,
+          createdAt: entry.createdAt?.toMillis?.() ?? entry.createdAt ?? Date.now(),
+          expiresAtMillis
+        };
+      })
+      .filter((entry) => {
+        return (
+          entry.userId &&
+          entry.userId !== currentUserId &&
+          entry.expiresAtMillis > now &&
+          onlineUserIds.has(entry.userId)
+        );
+      })
+      .map((entry) => ({
+        userId: entry.userId,
+        dailyId: entry.dailyId,
+        createdAt: entry.createdAt,
+        isActive: true
+      }));
+
+    users.sort((a, b) => b.createdAt - a.createdAt);
+
+    setOnlineUsers(users);
+    setLoading(false);
+  }, [currentUserId, currentDailyId]);
 
   // Mark user as online with heartbeat
   useEffect(() => {
@@ -47,12 +126,16 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
     // Mark as online with timestamp
     const markOnline = async () => {
       try {
-        await setDoc(presenceRef, {
-          userId: currentUserId,
-          isOnline: true,
-          lastSeen: Timestamp.now(),
-          updatedAt: Timestamp.now()
-        });
+        await setDoc(
+          presenceRef,
+          {
+            userId: currentUserId,
+            isOnline: true,
+            lastSeen: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          },
+          { merge: true }
+        );
       } catch (error) {
         console.error('Error marking user online:', error);
       }
@@ -101,70 +184,62 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
     };
   }, [currentUserId]);
 
-  // Fetch online users with stale presence filtering
-  const fetchOnlineUsers = async () => {
+  // Real-time listeners for presence and active IDs
+  useEffect(() => {
     if (!currentUserId || !currentDailyId) return;
 
-    try {
-      setRefreshing(true);
-      
-      // Get all presence records
-      const presenceRef = collection(db, 'presence');
-      const presenceQuery = query(presenceRef, where('isOnline', '==', true));
-      const presenceSnapshot = await getDocs(presenceQuery);
-      
-      // Filter out stale presence (not updated in last 30 seconds)
-      const now = Date.now();
-      const STALE_THRESHOLD = 30000; // 30 seconds
-      const onlineUserIds = new Set<string>();
-      
-      presenceSnapshot.forEach((doc) => {
-        const data = doc.data();
-        const lastSeen = data.lastSeen?.toMillis() || 0;
-        const isRecent = (now - lastSeen) < STALE_THRESHOLD;
-        
-        // Only include if recent and not current user
-        if (isRecent && data.userId !== currentUserId) {
-          onlineUserIds.add(data.userId);
-        }
-      });
+    setLoading(true);
+    presenceDataRef.current = [];
+    dailyDataRef.current = [];
+    readinessRef.current = { presence: false, daily: false };
 
-      // Get daily IDs for truly online users
-      const nowTimestamp = Timestamp.now();
-      const dailyIdsRef = collection(db, 'dailyIds');
-      const q = query(dailyIdsRef, where('expiresAt', '>', nowTimestamp));
-      const snapshot = await getDocs(q);
-      
-      const users: OnlineUser[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        // Only include users who are genuinely online with valid IDs
-        if (onlineUserIds.has(data.userId) && data.userId !== currentUserId) {
-          users.push({
-            userId: data.userId,
-            dailyId: data.dailyId,
-            createdAt: data.createdAt?.toMillis() || Date.now(),
-            isActive: true
-          });
-        }
-      });
+    const presenceRef = collection(db, 'presence');
+    const dailyIdsRef = collection(db, 'dailyIds');
 
-      // Sort by most recent
-      users.sort((a, b) => b.createdAt - a.createdAt);
+    const presenceUnsub = onSnapshot(
+      presenceRef,
+      (snapshot) => {
+        presenceDataRef.current = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        readinessRef.current.presence = true;
+        computeOnlineUsers();
+      },
+      (error) => {
+        console.error('Error listening to presence:', error);
+        readinessRef.current.presence = false;
+        setOnlineUsers([]);
+        setLoading(false);
+      }
+    );
 
-      setOnlineUsers(users);
-    } catch (error) {
-      console.error('Error fetching online users:', error);
-      setOnlineUsers([]); // Clear on error
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+    const dailyUnsub = onSnapshot(
+      dailyIdsRef,
+      (snapshot) => {
+        dailyDataRef.current = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        readinessRef.current.daily = true;
+        computeOnlineUsers();
+      },
+      (error) => {
+        console.error('Error listening to daily IDs:', error);
+        readinessRef.current.daily = false;
+        setOnlineUsers([]);
+        setLoading(false);
+      }
+    );
 
-  useEffect(() => {
-    fetchOnlineUsers();
-  }, [currentUserId, currentDailyId]);
+    return () => {
+      presenceUnsub();
+      dailyUnsub();
+      readinessRef.current = { presence: false, daily: false };
+      presenceDataRef.current = [];
+      dailyDataRef.current = [];
+    };
+  }, [currentUserId, currentDailyId, computeOnlineUsers]);
 
   const handleConnect = async (targetDailyId: string) => {
     if (!currentDailyId || chatLimit.isLimitReached) return;
@@ -243,14 +318,6 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
             title="Random Connect"
           >
             <span className={styles.buttonIcon}>{randomConnecting ? '⏳' : '🎲'}</span>
-          </button>
-          <button
-            onClick={fetchOnlineUsers}
-            disabled={refreshing}
-            className={`${styles.refreshButton} ${refreshing ? styles.refreshing : ''}`}
-            title="Refresh"
-          >
-            <span className={styles.buttonIcon}>🔄</span>
           </button>
           <div className={styles.badge}>
             {loading ? '⏳' : `${onlineUsers.length}`}

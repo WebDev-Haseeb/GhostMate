@@ -69,8 +69,7 @@
   flex-shrink: 0;
 }
 
-.randomButton,
-.refreshButton {
+.randomButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,29 +80,22 @@
   border: 1px solid rgba(123, 104, 238, 0.3);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: background var(--transition-base), border var(--transition-base), box-shadow var(--transition-base);
 }
 
-.randomButton:hover:not(:disabled),
-.refreshButton:hover:not(:disabled) {
+.randomButton:hover:not(:disabled) {
   background: rgba(123, 104, 238, 0.25);
   border-color: var(--accent-primary);
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(123, 104, 238, 0.4);
 }
 
-.randomButton:disabled,
-.refreshButton:disabled {
+.randomButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 .randomButton.connecting {
   animation: pulse 1s ease-in-out infinite;
-}
-
-.refreshButton.refreshing .buttonIcon {
-  animation: spin 1s linear infinite;
 }
 
 @keyframes pulse {
@@ -283,12 +275,7 @@
 .userCard:hover:not(:disabled) {
   background: rgba(123, 104, 238, 0.15);
   border-color: var(--accent-primary);
-  transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(123, 104, 238, 0.4);
-}
-
-.userCard:active:not(:disabled) {
-  transform: translateY(-2px);
 }
 
 .userCard:disabled {
@@ -397,8 +384,7 @@
   .onlineDot,
   .connecting,
   .limitWarning,
-  .randomButton.connecting,
-  .refreshButton.refreshing .buttonIcon {
+  .randomButton.connecting {
     animation: none;
     transform: none;
   }

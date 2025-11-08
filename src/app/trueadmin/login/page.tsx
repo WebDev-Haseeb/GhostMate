@@ -31,7 +31,13 @@ export default function TrueAdminLogin() {
       router.push('/trueadmin');
     } catch (err: any) {
       console.error('Admin login failed:', err);
-      setError(err.message || 'Invalid credentials');
+      if (err?.code === 'auth/operation-not-allowed') {
+        setError('Email/password sign-in is disabled for this Firebase project. Enable it in Firebase Console → Authentication → Sign-in method.');
+      } else if (err?.code === 'auth/user-not-found') {
+        setError('Admin account not found. Create the admin user in Firebase Authentication.');
+      } else {
+        setError(err.message || 'Invalid credentials');
+      }
     } finally {
       setLoading(false);
     }

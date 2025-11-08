@@ -38,6 +38,7 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
   const [otherUserId, setOtherUserId] = useState<string | null>(null);
   const [otherUserIdLoading, setOtherUserIdLoading] = useState<boolean>(true);
   const [otherUserIdError, setOtherUserIdError] = useState<string | null>(null);
+  const [selfChatBlocked, setSelfChatBlocked] = useState(false);
   
   // Generate chat ID
   const chatId = dailyId ? generateChatId(dailyId, otherDailyId) : null;
@@ -57,6 +58,12 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
     messages
   });
   
+  // Detect attempts to chat with self once IDs are available
+  useEffect(() => {
+    if (!dailyId) return;
+    setSelfChatBlocked(!!otherDailyId && otherDailyId === dailyId);
+  }, [dailyId, otherDailyId]);
+
   // Fetch other user's Firebase UID
   useEffect(() => {
     if (!otherDailyId) {
@@ -105,18 +112,69 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
     );
   }
 
+  if (selfChatBlocked) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.unavailableCard}>
+          <div className={styles.unavailableIcon}>🚫</div>
+          <h2>You already own this Daily ID</h2>
+          <p>
+            GhostMate connects you anonymously with <strong>other</strong> people. Try sharing your ID with someone else or browse the dashboard to find new connections.
+          </p>
+          <div className={styles.unavailableTips}>
+            <div>
+              <span>🎯</span>
+              <p>Share your code with a friend so they can join this chat.</p>
+            </div>
+            <div>
+              <span>✨</span>
+              <p>Explore today’s highlights to see what’s trending.</p>
+            </div>
+          </div>
+          <div className={styles.unavailableActions}>
+            <button className={styles.primaryAction} onClick={() => router.push('/')}>
+              Return to Dashboard
+            </button>
+            <button
+              className={styles.secondaryAction}
+              onClick={() => router.push('/stories')}
+            >
+              Explore Stories
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Error state - other user's ID doesn't exist
   if (otherUserIdError) {
     return (
       <div className={styles.container}>
-        <div className={styles.error}>
-          <span className={styles.errorIcon}>⚠️</span>
-          <h3>Invalid Daily ID</h3>
-          <p>{otherUserIdError}</p>
-          <p className={styles.errorDetail}>
-            The Daily ID <strong>{otherDailyId}</strong> is not valid or has expired.
+        <div className={styles.unavailableCard}>
+          <div className={styles.unavailableIcon}>👻</div>
+          <h2>We couldn’t find that Daily ID</h2>
+          <p>
+            The Daily ID <strong>{otherDailyId}</strong> isn’t active anymore. IDs reset every midnight, so share your fresh ID or wait for your friend to come back online.
           </p>
-          <button onClick={() => router.push('/')}>Go Home</button>
+          <div className={styles.unavailableTips}>
+            <div>
+              <span>🕛</span>
+              <p>Daily IDs refresh every midnight. Grab the latest one from your dashboard.</p>
+            </div>
+            <div>
+              <span>🔔</span>
+              <p>Ask your friend to share their current ID so you can reconnect instantly.</p>
+            </div>
+          </div>
+          <div className={styles.unavailableActions}>
+            <button className={styles.primaryAction} onClick={() => router.push('/')}>
+              Back to Dashboard
+            </button>
+            <button className={styles.secondaryAction} onClick={() => router.push('/stories')}>
+              View Highlights
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -126,10 +184,25 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
   if (error) {
     return (
       <div className={styles.container}>
-        <div className={styles.error}>
-          <span className={styles.errorIcon}>⚠️</span>
+        <div className={styles.unavailableCard}>
+          <div className={styles.unavailableIcon}>⚠️</div>
+          <h2>We hit a snag</h2>
           <p>{error}</p>
-          <button onClick={() => router.push('/')}>Go Home</button>
+          <div className={styles.unavailableTips}>
+            <div>
+              <span>🔁</span>
+              <p>Try reloading the page – most issues resolve themselves.</p>
+            </div>
+            <div>
+              <span>📮</span>
+              <p>If it continues, let the GhostMate team know with a quick note.</p>
+            </div>
+          </div>
+          <div className={styles.unavailableActions}>
+            <button className={styles.primaryAction} onClick={() => router.push('/')}>
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -139,9 +212,21 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
   if (!dailyId) {
     return (
       <div className={styles.container}>
-        <div className={styles.error}>
-          <p>Unable to load your daily ID</p>
-          <button onClick={() => router.push('/')}>Go Home</button>
+        <div className={styles.unavailableCard}>
+          <div className={styles.unavailableIcon}>🔄</div>
+          <h2>We couldn’t load your Daily ID</h2>
+          <p>Refresh the dashboard to grab a fresh anonymous ID, then try again.</p>
+          <div className={styles.unavailableTips}>
+            <div>
+              <span>💡</span>
+              <p>Daily IDs are unique to you—get a new one instantly from the dashboard.</p>
+            </div>
+          </div>
+          <div className={styles.unavailableActions}>
+            <button className={styles.primaryAction} onClick={() => router.push('/')}>
+              Reload Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );

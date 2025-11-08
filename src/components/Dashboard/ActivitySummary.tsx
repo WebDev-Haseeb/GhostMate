@@ -41,23 +41,36 @@ export default function ActivitySummary({
         setHighlightsGiven(highlightsSnapshot.size);
 
         // Get active connections (mutual favorites that haven't expired)
-        const now = Timestamp.now();
+        const nowMillis = Date.now();
         const connectionsRef = collection(db, 'connections');
-        const connectionsQuery = query(
-          connectionsRef,
-          where('user1', '==', userId),
-          where('expiresAt', '>', now)
+
+        const connectionsSnapshot = await getDocs(
+          query(connectionsRef, where('user1', '==', userId))
         );
-        const connectionsSnapshot = await getDocs(connectionsQuery);
-        
-        const connectionsQuery2 = query(
-          connectionsRef,
-          where('user2', '==', userId),
-          where('expiresAt', '>', now)
+        const connectionsSnapshot2 = await getDocs(
+          query(connectionsRef, where('user2', '==', userId))
         );
-        const connectionsSnapshot2 = await getDocs(connectionsQuery2);
-        
-        setActiveConnections(connectionsSnapshot.size + connectionsSnapshot2.size);
+
+        const countActive = (docs: typeof connectionsSnapshot.docs) =>
+          docs.reduce((count, docSnap) => {
+            const data = docSnap.data();
+            const expiresAt = data?.expiresAt;
+            let expiryMillis = 0;
+
+            if (expiresAt instanceof Timestamp) {
+              expiryMillis = expiresAt.toMillis();
+            } else if (typeof expiresAt === 'number') {
+              expiryMillis = expiresAt;
+            } else if (expiresAt?.toDate) {
+              expiryMillis = expiresAt.toDate().getTime();
+            }
+
+            return expiryMillis > nowMillis ? count + 1 : count;
+          }, 0);
+
+        setActiveConnections(
+          countActive(connectionsSnapshot.docs) + countActive(connectionsSnapshot2.docs)
+        );
 
         // Get user's current streak
         const usersRef = collection(db, 'users');

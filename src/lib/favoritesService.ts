@@ -20,7 +20,6 @@
  */
 
 import { 
-  getFirestore, 
   doc, 
   getDoc, 
   setDoc, 
@@ -35,7 +34,7 @@ import {
   onSnapshot,
   Unsubscribe
 } from 'firebase/firestore';
-import app from './firebase';
+import { db } from './firebase';
 import { 
   Favorite, 
   Connection, 
@@ -52,8 +51,6 @@ import { generateChatId } from './chatUtils';
 // Re-export types for convenience
 export type { CreateFavoriteInput, FavoriteActionResult, Connection, Favorite, UserFavorites } from '@/types/favorites';
 export type { Unsubscribe };
-
-const db = getFirestore(app);
 
 /**
  * Generate a unique connection ID from two user IDs

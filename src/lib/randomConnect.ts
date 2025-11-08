@@ -4,18 +4,14 @@
  */
 
 import { 
-  getFirestore, 
   collection, 
   query, 
   where, 
   getDocs 
 } from 'firebase/firestore';
-import { getDatabase, ref, get } from 'firebase/database';
-import app from './firebase';
+import { ref, get } from 'firebase/database';
+import app, { db, database } from './firebase';
 import { getTodayMidnight } from './dailyId';
-
-const db = getFirestore(app);
-const database = getDatabase(app);
 
 /**
  * Get a random active user's daily ID

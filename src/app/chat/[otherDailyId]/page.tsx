@@ -6,7 +6,6 @@ export default async function ChatPage({
   params: Promise<{ otherDailyId: string }>;
 }) {
   const { otherDailyId } = await params;
-  
-  return <ChatContainer otherDailyId={otherDailyId} />;
-}
 
+  return <ChatContainer otherDailyId={decodeURIComponent(otherDailyId)} />;
+}

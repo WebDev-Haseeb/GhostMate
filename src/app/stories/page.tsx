@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getApprovedStories, deleteExpiredStories } from '@/lib/storiesService';
+import { getApprovedStories } from '@/lib/storiesService';
 import { ApprovedStory } from '@/types/highlights';
 import styles from './stories.module.css';
 
@@ -36,9 +36,6 @@ export default function StoriesFeed() {
       try {
         setLoading(true);
         setError(null);
-
-        // Clean up expired stories first (client-side check)
-        await deleteExpiredStories();
 
         // Fetch active stories
         const approvedStories = await getApprovedStories(100);
@@ -82,11 +79,14 @@ export default function StoriesFeed() {
   if (authLoading || loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}>
-            <img src="/favicon.svg" alt="Loading" />
+        <div className={styles.loaderCard}>
+          <div className={styles.loaderSpinner}>
+            <div className={styles.loaderCore}>
+              <img src="/favicon.svg" alt="Loading stories" />
+            </div>
           </div>
-          <p>Loading stories...</p>
+          <h2>Gathering today&apos;s highlights...</h2>
+          <p className={styles.loaderSubtitle}>Give us a second while we surface the most magical chats.</p>
         </div>
       </div>
     );
