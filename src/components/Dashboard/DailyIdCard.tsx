@@ -30,7 +30,7 @@ export default function DailyIdCard({ dailyId, loading, error }: DailyIdCardProp
     if (!dailyId) return;
 
     // Curated share message with ID and URL
-    const shareText = `👻 Let's chat anonymously on GhostMate!
+    const shareText = `🌟 Let's chat anonymously on GhostMate!
 
 My Daily ID: ${formatDailyId(dailyId)}
 
@@ -90,7 +90,7 @@ https://ghostmate.online
         ) : loading ? (
           <div className={styles.loading}>
             <div className={styles.loadingSpinner}>
-              <span>👻</span>
+              <img src="/favicon.svg" alt="GhostMate" style={{ width: '1.5rem', height: '1.5rem' }} />
             </div>
             <p className={styles.loadingText}>Generating your ID...</p>
           </div>

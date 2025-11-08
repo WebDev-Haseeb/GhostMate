@@ -47,7 +47,9 @@ export default function LandingPage() {
     return (
       <div className={styles.container}>
         <div className={styles.loadingScreen}>
-          <div className={styles.ghostLoader}>👻</div>
+          <div className={styles.ghostLoader}>
+            <img src="/favicon.svg" alt="Loading" />
+          </div>
           <p>Loading GhostMate...</p>
         </div>
       </div>
@@ -66,7 +68,7 @@ export default function LandingPage() {
       <div className={styles.container}>
         {/* Floating Ghost Elements */}
         <div className={styles.floatingGhosts}>
-          <span className={styles.floatingGhost} style={{ top: '10%', left: '5%' }}>👻</span>
+          <img src="/favicon.svg" alt="" className={styles.floatingGhost} style={{ top: '10%', left: '5%' }} />
           <span className={styles.floatingGhost} style={{ top: '20%', right: '10%' }}>🌙</span>
           <span className={styles.floatingGhost} style={{ bottom: '15%', left: '8%' }}>✨</span>
           <span className={styles.floatingGhost} style={{ top: '60%', right: '5%' }}>💬</span>
@@ -75,7 +77,9 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className={styles.hero}>
           <div className={styles.heroContent}>
-            <div className={styles.ghostIcon}>👻</div>
+            <div className={styles.ghostIcon}>
+              <img src="/favicon.svg" alt="GhostMate" />
+            </div>
             <h1 className={styles.title}>
               Ghost<span className={styles.titleAccent}>Mate</span>
             </h1>
@@ -260,7 +264,7 @@ export default function LandingPage() {
             <Link href="/terms" className={styles.legalLink}>Terms of Use</Link>
           </div>
           <p className={styles.footerCopyright}>
-            © {new Date().getFullYear()} GhostMate. Made with 👻 for anonymous connections.
+            © {new Date().getFullYear()} GhostMate. Made with ❤️ for anonymous connections.
           </p>
         </footer>
       </div>

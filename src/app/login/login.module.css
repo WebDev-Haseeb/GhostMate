@@ -48,10 +48,18 @@
 
 .floatingGhost {
   position: absolute;
-  font-size: 2rem;
   opacity: 0.15;
   animation: gentleFloat 6s ease-in-out infinite;
   filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.3));
+}
+
+.floatingGhost[src] {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.floatingGhost:not([src]) {
+  font-size: 2rem;
 }
 
 .floatingGhost:nth-child(1) { animation-delay: 0s; animation-duration: 7s; }
@@ -124,10 +132,14 @@
 
 /* Ghost Icon */
 .ghostIcon {
-  font-size: 5rem;
   margin-bottom: 1rem;
   animation: ghostFloat 3s ease-in-out infinite;
   filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.5));
+}
+
+.ghostIcon img {
+  width: 8rem;
+  height: 8rem;
 }
 
 @keyframes ghostFloat {

@@ -8,7 +8,7 @@ export default function TermsOfUsePage() {
     <div className={styles.container}>
       {/* Floating Ghost Elements */}
       <div className={styles.floatingGhosts}>
-        <span className={styles.floatingGhost}>👻</span>
+        <img src="/favicon.svg" alt="" className={styles.floatingGhost} />
         <span className={styles.floatingGhost}>📜</span>
         <span className={styles.floatingGhost}>⚖️</span>
         <span className={styles.floatingGhost}>✨</span>
@@ -19,7 +19,9 @@ export default function TermsOfUsePage() {
           <Link href="/login" className={styles.backLink}>
             ← Back to GhostMate
           </Link>
-          <div className={styles.icon}>👻</div>
+          <div className={styles.icon}>
+            <img src="/favicon.svg" alt="GhostMate" />
+          </div>
           <h1 className={styles.title}>Terms of Use</h1>
           <p className={styles.lastUpdated}>Last Updated: November 7, 2025</p>
         </div>

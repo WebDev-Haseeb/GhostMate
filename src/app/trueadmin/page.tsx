@@ -125,7 +125,7 @@ export default function TrueAdminPanel() {
     <div className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>
-          <span className={styles.icon}>👻</span>
+          <img src="/favicon.svg" alt="Loading" className={styles.icon} />
           Admin Panel
         </h1>
         <div className={styles.headerButtons}>

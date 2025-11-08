@@ -20,7 +20,7 @@ export default function DashboardHeader({ timeUntilReset, onSignOut }: Dashboard
       <div className={styles.container}>
         {/* Logo/Brand */}
         <div className={styles.brand}>
-          <span className={styles.logo}>👻</span>
+          <img src="/favicon.svg" alt="GhostMate" className={styles.logo} />
           <h1 className={styles.title}>GhostMate</h1>
         </div>
 

@@ -271,7 +271,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
         {loading ? (
           <div className={styles.loadingState}>
             <div className={styles.spinner}>
-              <span>👻</span>
+              <img src="/favicon.svg" alt="Loading" style={{ width: '2rem', height: '2rem' }} />
             </div>
             <p>Finding online users...</p>
           </div>
@@ -291,7 +291,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
                 className={`${styles.userCard} ${connectingTo === user.dailyId ? styles.connecting : ''}`}
               >
                 <div className={styles.userIcon}>
-                  <span>👻</span>
+                  <img src="/favicon.svg" alt="" style={{ width: '2.5rem', height: '2.5rem', opacity: 0.5 }} />
                 </div>
                 <div className={styles.userId}>
                   {formatDailyId(user.dailyId)}

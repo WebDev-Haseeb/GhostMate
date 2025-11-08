@@ -41,7 +41,9 @@ export default function ChatWindow({
   if (messages.length === 0) {
     return (
       <div className={styles.emptyState}>
-        <div className={styles.ghostIcon}>👻</div>
+        <div className={styles.ghostIcon}>
+          <img src="/favicon.svg" alt="No messages" />
+        </div>
         <p>No messages yet</p>
         <span>Start the conversation!</span>
       </div>

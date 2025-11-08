@@ -155,12 +155,21 @@
 }
 
 .icon {
-  font-size: 4rem;
   margin: 1rem 0 1.5rem 0;
   filter: drop-shadow(0 4px 16px rgba(123, 104, 238, 0.4));
-  /* Removed float animation for better scroll performance */
+  animation: float 2s ease-in-out infinite;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+}
+
+.icon img {
+  width: 5rem;
+  height: 5rem;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateZ(0); }
+  50% { transform: translateY(-10px) translateZ(0); }
 }
 
 .title {

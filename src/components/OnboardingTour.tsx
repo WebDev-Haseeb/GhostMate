@@ -17,7 +17,7 @@ interface OnboardingStep {
 
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
-    icon: '👻',
+    icon: '🎭',
     title: 'Welcome to GhostMate!',
     description: 'Connect anonymously with others through daily IDs. Every conversation is fresh, and everything resets at midnight.'
   },

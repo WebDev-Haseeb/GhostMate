@@ -85,7 +85,7 @@ export default function Home() {
           <div className={styles.intro}>
             <div className={styles.loadingSpinner}>
               <div className={styles.ghostLoader}>
-                <span>👻</span>
+                <img src="/favicon.svg" alt="Loading" style={{ width: '4rem', height: '4rem' }} />
               </div>
             </div>
           </div>

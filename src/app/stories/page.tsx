@@ -83,7 +83,9 @@ export default function StoriesFeed() {
     return (
       <div className={styles.container}>
         <div className={styles.loading}>
-          <div className={styles.spinner}>👻</div>
+          <div className={styles.spinner}>
+            <img src="/favicon.svg" alt="Loading" />
+          </div>
           <p>Loading stories...</p>
         </div>
       </div>
@@ -111,7 +113,7 @@ export default function StoriesFeed() {
       </header>
 
       <div className={styles.subtitle}>
-        <p>Anonymous moments that resonated with two ghosts 👻</p>
+        <p>Anonymous moments that resonated with two souls ✨</p>
         <p className={styles.subtitleSmall}>Stories disappear after 24 hours</p>
       </div>
 

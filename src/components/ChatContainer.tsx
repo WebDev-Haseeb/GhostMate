@@ -93,7 +93,9 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
     return (
       <div className={styles.container}>
         <div className={styles.loading}>
-          <div className={styles.spinner}>👻</div>
+          <div className={styles.spinner}>
+            <img src="/favicon.svg" alt="Loading" />
+          </div>
           <p>Loading chat...</p>
         </div>
       </div>

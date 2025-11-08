@@ -16,8 +16,15 @@
 }
 
 .spinner {
-  font-size: 3rem;
   animation: float 3s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner img {
+  width: 3rem;
+  height: 3rem;
 }
 
 @keyframes float {
