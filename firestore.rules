@@ -1,81 +1,107 @@
 rules_version = '2';
 
 service cloud.firestore {
+  function adminEmails() {
+    // Primary admin email(s) – replace or extend this list to match real admin accounts.
+    return ['admin@ghostmate.com'];
+  }
+
+  function isAdmin() {
+    return request.auth != null
+      && request.auth.token.email != null
+      && (
+        adminEmails().hasAny([request.auth.token.email]) ||
+        (
+          exists(/databases/$(database)/documents/config/admins) &&
+          get(/databases/$(database)/documents/config/admins).data.emails != null &&
+          get(/databases/$(database)/documents/config/admins).data.emails.hasAny(
+            [request.auth.token.email]
+          )
+        )
+      );
+  }
+
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
   match /databases/{database}/documents {
+    // Admin configuration document
+    match /config/admins {
+      allow read, write: if isAdmin();
+    }
     
     // Users collection - users can only read/write their own document
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
     }
     
     // Daily IDs collection - read-only for checking collisions
     // Only allow reads for authenticated users
     match /dailyIds/{dailyId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow read: if isSignedIn() || isAdmin();
+      allow write: if isSignedIn() || isAdmin();
     }
     
     // User Favorites - authenticated users can read any favorites (for mutual detection)
     // but can only write their own
     match /userFavorites/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isSignedIn() || isAdmin();
+      allow write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
     }
     
     // Connections - users can read connections they're part of
     match /connections/{connectionId} {
-      allow read: if request.auth != null && 
-        (connectionId.matches('.*' + request.auth.uid + '.*'));
-      allow write: if request.auth != null && 
-        (connectionId.matches('.*' + request.auth.uid + '.*'));
+      allow read: if (isSignedIn() && connectionId.matches('.*' + request.auth.uid + '.*')) || isAdmin();
+      allow write: if (isSignedIn() && connectionId.matches('.*' + request.auth.uid + '.*')) || isAdmin();
     }
     
     // Daily Connection Checks - users can read/write checks they're part of
     match /dailyConnectionChecks/{checkId} {
-      allow read: if request.auth != null && 
-        (checkId.matches('.*' + request.auth.uid + '.*'));
-      allow write: if request.auth != null && 
-        (checkId.matches('.*' + request.auth.uid + '.*'));
+      allow read: if (isSignedIn() && checkId.matches('.*' + request.auth.uid + '.*')) || isAdmin();
+      allow write: if (isSignedIn() && checkId.matches('.*' + request.auth.uid + '.*')) || isAdmin();
     }
     
     // Chat Limits - users can only read/write their own limits
     match /chatLimits/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
+      allow write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
     }
     
-    // Note: Admin authentication is handled via session cookies, not Firestore
-    // No admin collection needed - credentials stored in .env
-    
-    // User Highlights - authenticated users can read any highlights (to detect mutual)
-    // but can only write their own
-    match /highlights/{userId}/messages/{messageId} {
-      allow read: if request.auth != null;  // Any authenticated user can read
-      allow write: if request.auth != null && request.auth.uid == userId;  // Only write own
+    // User Highlights - root document metadata (allows admin cleanup)
+    match /highlights/{userId} {
+      allow read: if isSignedIn() || isAdmin();
+      allow write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
+
+      // Nested messages subcollection
+      match /messages/{messageId} {
+        allow read: if isSignedIn() || isAdmin();  // Any authenticated user or admin can read
+        allow write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();  // Only write own unless admin frontend
+      }
     }
     
     // Queued Stories - users can create, admin app handles approve/reject
     match /queuedStories/{storyId} {
-      allow read: if request.auth != null;  // Any authenticated user can read (needed for lock status)
-      allow create: if request.auth != null;  // Users can create when both highlight
-      allow update, delete: if request.auth != null;  // Admin operations (protected by secret admin panel)
+      allow read: if isSignedIn() || isAdmin();  // Needed for lock status
+      allow create: if isSignedIn() || isAdmin();  // Users can create when both highlight
+      allow update, delete: if isAdmin();
     }
     
     // Approved Stories - public read, admin app handles creation
     match /approvedStories/{storyId} {
-      allow read: if request.auth != null;  // Any authenticated user can view
-      allow write: if request.auth != null;  // Admin operations (protected by secret admin panel)
+      allow read: if isSignedIn() || isAdmin();
+      allow write: if isAdmin();
     }
     
     // Presence - users can read all (to see who's online) but only write their own
     match /presence/{userId} {
-      allow read: if request.auth != null;  // Any authenticated user can see who's online
-      allow write: if request.auth != null && request.auth.uid == userId;  // Only write own presence
+      allow read: if isSignedIn() || isAdmin();
+      allow write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
     }
     
-    // Deny all other access by default
+    // Deny all other access by default (unless admin)
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if isAdmin();
     }
   }
 }

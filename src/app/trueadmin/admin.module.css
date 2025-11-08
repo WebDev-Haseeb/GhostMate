@@ -62,13 +62,13 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .homeButton:hover {
   background: #bb86fc;
   color: #1a1a2e;
-  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(187, 134, 252, 0.35);
 }
 
 .logoutButton {
@@ -80,13 +80,13 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .logoutButton:hover {
   background: #cf6679;
   color: #1a1a2e;
-  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(207, 102, 121, 0.3);
 }
 
 .stats {
@@ -95,6 +95,97 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
+}
+
+.maintenanceSection {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+}
+
+.maintenanceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.maintenanceCard,
+.maintenanceCardWarning {
+  background: rgba(26, 26, 46, 0.9);
+  border: 2px solid rgba(187, 134, 252, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #e0e0e0;
+}
+
+.maintenanceCardWarning {
+  border-color: rgba(207, 102, 121, 0.4);
+  background: rgba(64, 14, 18, 0.65);
+}
+
+.maintenanceCard h3,
+.maintenanceCardWarning h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: #bb86fc;
+}
+
+.maintenanceCardWarning h3 {
+  color: #ff8a80;
+}
+
+.maintenanceCard p,
+.maintenanceCardWarning p {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.maintenanceButton,
+.maintenanceButtonDanger {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  min-height: 44px;
+  border: 2px solid transparent;
+}
+
+.maintenanceButton {
+  background: rgba(187, 134, 252, 0.12);
+  border-color: rgba(187, 134, 252, 0.5);
+  color: #bb86fc;
+}
+
+.maintenanceButton:hover:not(:disabled) {
+  background: #bb86fc;
+  color: #1a1a2e;
+  box-shadow: 0 6px 18px rgba(187, 134, 252, 0.35);
+}
+
+.maintenanceButtonDanger {
+  background: rgba(207, 102, 121, 0.12);
+  border-color: rgba(207, 102, 121, 0.6);
+  color: #ff8a80;
+}
+
+.maintenanceButtonDanger:hover:not(:disabled) {
+  background: #cf6679;
+  color: #1a1a2e;
+  box-shadow: 0 6px 18px rgba(207, 102, 121, 0.3);
+}
+
+.maintenanceButton:disabled,
+.maintenanceButtonDanger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .statCard {
@@ -211,8 +302,7 @@
 
 .storyCard:hover {
   border-color: #bb86fc;
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(187, 134, 252, 0.2);
+  box-shadow: 0 12px 28px rgba(187, 134, 252, 0.25);
 }
 
 .storyHeader {
@@ -271,7 +361,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   white-space: nowrap;
   min-height: 44px;
 }
@@ -290,7 +380,7 @@
 .approveButton:hover:not(:disabled) {
   background: #03dac6;
   color: #1a1a2e;
-  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(3, 218, 198, 0.3);
 }
 
 .rejectButton {
@@ -302,7 +392,7 @@
 .rejectButton:hover:not(:disabled) {
   background: #cf6679;
   color: #1a1a2e;
-  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(207, 102, 121, 0.3);
 }
 
 /* Mobile responsiveness */
@@ -320,6 +410,10 @@
   }
 
   .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .maintenanceGrid {
     grid-template-columns: 1fr;
   }
 }

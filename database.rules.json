@@ -1,17 +1,19 @@
 {
   "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
     "chats": {
       ".read": "auth != null",
       ".write": "auth != null",
       "$chatId": {
         "participants": {
-          ".validate": "newData.hasChildren()"
+          ".validate": "!newData.exists() || newData.hasChildren()"
         },
-            "messages": {
-              "$messageId": {
-                ".validate": "newData.hasChildren(['senderId', 'text', 'timestamp']) && newData.child('senderId').isString() && newData.child('text').isString() && newData.child('timestamp').isNumber() && (!newData.hasChild('isSystemMessage') || newData.child('isSystemMessage').isBoolean())"
-              }
-            }
+        "messages": {
+          "$messageId": {
+            ".validate": "!newData.exists() || (newData.hasChildren(['senderId', 'text', 'timestamp']) && newData.child('senderId').isString() && newData.child('text').isString() && newData.child('timestamp').isNumber() && (!newData.hasChild('isSystemMessage') || newData.child('isSystemMessage').isBoolean()))"
+          }
+        }
       }
     }
   }

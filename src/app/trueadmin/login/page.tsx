@@ -9,7 +9,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { verifyAdminCredentials, setAdminSession } from '@/lib/secretAdminAuth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import styles from './login.module.css';
 
 export default function TrueAdminLogin() {
@@ -19,25 +20,21 @@ export default function TrueAdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     setLoading(true);
     setError(null);
 
-    // Small delay to prevent brute force
-    setTimeout(() => {
-      if (verifyAdminCredentials(email, password)) {
-        // Set session cookie
-        setAdminSession();
-        
-        // Redirect to admin panel
-        router.push('/trueadmin');
-      } else {
-        setError('Invalid credentials');
-        setLoading(false);
-      }
-    }, 500);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/trueadmin');
+    } catch (err: any) {
+      console.error('Admin login failed:', err);
+      setError(err.message || 'Invalid credentials');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
