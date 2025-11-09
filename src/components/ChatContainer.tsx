@@ -237,23 +237,20 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
       {/* Header */}
       <header className={styles.header}>
         <button 
-          className={styles.backButton}
+          className={`${styles.backButton} ${styles.headerBack}`}
           onClick={() => router.push('/')}
           aria-label="Back to dashboard"
         >
           ← Back
         </button>
-        <div className={styles.chatInfo}>
+        <div className={`${styles.chatInfo} ${styles.headerInfo}`}>
           <h2>Anonymous Chat</h2>
           <div className={styles.subtitle}>
             <span className={styles.statusIndicator}></span>
             ID: {otherDailyId}
           </div>
         </div>
-        <div className={styles.resetTime}>
-          🕐 {timeUntilReset}
-        </div>
-        <div className={styles.favoriteSection}>
+        <div className={`${styles.favoriteSection} ${styles.headerActions}`}>
           <FavoriteButton
             userId={user?.uid || null}
             userDailyId={dailyId}
@@ -261,6 +258,11 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
           />
         </div>
       </header>
+
+      <div className={styles.resetBar}>
+        <span className={styles.resetLabel}>Resets in</span>
+        <span className={styles.resetValue}>🕐 {timeUntilReset}</span>
+      </div>
 
       {/* Removed PurgeWarning - reset time now in header */}
 

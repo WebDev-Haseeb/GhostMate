@@ -143,15 +143,17 @@
 
 /* Actions */
 .actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-md);
   width: 100%;
-  max-width: 400px;
+  max-width: 460px;
+  align-items: stretch;
 }
 
 .actionButton {
-  flex: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
@@ -341,12 +343,38 @@
   }
 
   .actions {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     max-width: 100%;
+    gap: var(--space-sm);
   }
 
   .actionButton {
     width: 100%;
+    padding: var(--space-sm) var(--space-lg);
+  }
+
+  .buttonIcon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .buttonPrimaryText {
+    font-size: 0.95rem;
+  }
+
+  .buttonSecondaryText {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .actions {
+    gap: var(--space-sm);
+  }
+
+  .actionButton {
+    padding: var(--space-sm) var(--space-md);
+    gap: var(--space-sm);
   }
 }
 

@@ -45,10 +45,10 @@
 /* Message Row - Contains bubble + action buttons */
 .messageWrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-xs);
   animation: fadeSlideIn 0.4s ease-out;
-  max-width: 70%;
+  max-width: min(75%, 28rem);
   position: relative;
 }
 
@@ -90,13 +90,15 @@
 /* My messages - right side with buttons on left */
 .myMessage {
   align-self: flex-end;
-  flex-direction: row-reverse;
+  margin-left: auto;
+  justify-content: flex-end;
 }
 
 /* Their messages - left side with buttons on right */
 .theirMessage {
   align-self: flex-start;
-  flex-direction: row;
+  justify-content: flex-start;
+  margin-right: auto;
 }
 
 /* Timestamp tooltip */
@@ -182,6 +184,12 @@
 }
 
 .myMessage .highlightButtonContainer {
+  margin-left: var(--space-xs);
+  margin-right: 0;
+}
+
+.theirMessage .highlightButtonContainer {
+  order: -1;
   margin-left: 0;
   margin-right: var(--space-xs);
 }
@@ -260,7 +268,7 @@
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .messageWrapper {
-    max-width: 85%;
+    max-width: min(85%, 26rem);
   }
 
   .messagesContainer {
@@ -286,29 +294,8 @@
   }
 
   .messageWrapper {
-    max-width: 100%;
-    flex-wrap: wrap;
-    gap: var(--space-xs);
-  }
-
-  .myMessage,
-  .theirMessage {
-    align-self: stretch;
-  }
-
-  .myMessage .bubble,
-  .theirMessage .bubble {
-    width: 100%;
-  }
-
-  .highlightButtonContainer {
-    margin: var(--space-xxs) 0 0;
-    order: 2;
-    justify-content: flex-end;
-  }
-
-  .myMessage .highlightButtonContainer {
-    margin: var(--space-xxs) 0 0;
+    max-width: min(90%, 24rem);
+    gap: var(--space-xxs);
   }
 
   .timestamp {

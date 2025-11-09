@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Space_Grotesk, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/components/ui/NotificationProvider";
+import PresenceManager from "@/components/PresenceManager";
 import "./globals.css";
 
 // Display font for headings - Bold, modern, tech-forward
@@ -95,6 +96,7 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
         <NotificationProvider>
           <AuthProvider>
+            <PresenceManager />
             {children}
           </AuthProvider>
         </NotificationProvider>

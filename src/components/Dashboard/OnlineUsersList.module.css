@@ -32,9 +32,12 @@
 
 /* Header */
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas:
+    "content action badge"
+    "content action badge";
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-md);
   padding: var(--space-lg);
   background: linear-gradient(135deg, rgba(123, 104, 238, 0.1), rgba(155, 136, 255, 0.05));
@@ -43,8 +46,11 @@
 }
 
 .headerContent {
-  flex: 1;
+  grid-area: content;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
 }
 
 .title {
@@ -63,10 +69,12 @@
 }
 
 .headerActions {
+  grid-area: action;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   flex-shrink: 0;
+  justify-self: flex-end;
 }
 
 .randomButton {
@@ -113,6 +121,11 @@
 }
 
 .badge {
+  grid-area: badge;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
   padding: var(--space-sm) var(--space-md);
   background: rgba(123, 104, 238, 0.2);
   border: 1px solid rgba(123, 104, 238, 0.4);
@@ -295,6 +308,9 @@
 }
 
 .userIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 2rem;
   filter: drop-shadow(0 2px 8px rgba(123, 104, 238, 0.5));
 }
@@ -341,16 +357,22 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .header {
-    flex-wrap: wrap;
-  }
-
-  .headerContent {
-    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "content content"
+      "action badge";
+    gap: var(--space-sm);
   }
 
   .headerActions {
-    width: 100%;
-    justify-content: space-between;
+    justify-self: flex-start;
+  }
+
+  .badge {
+    justify-self: flex-end;
+    width: 44px;
+    height: 44px;
+    padding: 0;
   }
 
   .scrollContainer {
@@ -377,13 +399,19 @@
 
 @media (max-width: 600px) {
   .header {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "content"
+      "action"
+      "badge";
     padding: var(--space-md);
     gap: var(--space-sm);
   }
 
   .headerActions {
+    justify-self: stretch;
+    width: 100%;
+    justify-content: space-between;
     gap: var(--space-sm);
   }
 
@@ -393,8 +421,11 @@
   }
 
   .badge {
+    justify-self: flex-start;
+    width: 40px;
+    height: 40px;
     font-size: 0.8rem;
-    padding: var(--space-xxs) var(--space-sm);
+    padding: 0;
   }
 
   .scrollContainer {
@@ -402,8 +433,31 @@
   }
 
   .userGrid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: var(--space-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .userGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xs);
+  }
+
+  .userCard {
+    align-items: flex-start;
+    padding: var(--space-sm);
+    gap: var(--space-xs);
+  }
+
+  .userIcon img {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .userStatus {
+    justify-content: flex-start;
+    font-size: 0.65rem;
   }
 }
 

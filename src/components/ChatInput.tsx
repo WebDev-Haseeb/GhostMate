@@ -70,14 +70,6 @@ export default function ChatInput({
 
   return (
     <form className={styles.chatInput} onSubmit={handleSubmit} onClick={handleContainerClick}>
-      <button
-        type="submit"
-        disabled={!isValid || disabled}
-        className={styles.sendButton}
-        aria-label="Send message"
-      >
-        <span>➤</span>
-      </button>
       <div className={styles.inputWrapper}>
         <textarea
           value={text}
@@ -95,6 +87,14 @@ export default function ChatInput({
           {text.length}/1000
         </div>
       </div>
+      <button
+        type="submit"
+        disabled={!isValid || disabled}
+        className={styles.sendButton}
+        aria-label="Send message"
+      >
+        <span>➤</span>
+      </button>
     </form>
   );
 }

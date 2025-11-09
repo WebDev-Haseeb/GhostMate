@@ -2,13 +2,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: 1px solid rgba(123, 104, 238, 0.25);
   border-radius: 999px;
   background: rgba(123, 104, 238, 0.12);
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: all 0.2s ease;
   opacity: 0.85;
   position: relative;
@@ -190,14 +190,26 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .highlightButton {
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 1.25rem;
-    padding: 0.5rem;
+    width: 24px;
+    height: 24px;
+    font-size: 0.85rem;
+    padding: 0.1rem;
   }
 
   .icon {
-    font-size: 1.375rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .highlightButton {
+    width: 22px;
+    height: 22px;
+    padding: 0.08rem;
+  }
+
+  .icon {
+    font-size: 0.8rem;
   }
 }
 

@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, doc, setDoc, deleteDoc, Timestamp, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { collection, Timestamp, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { formatDailyId, getNextMidnight } from '@/lib/dailyId';
+import { formatDailyId } from '@/lib/dailyId';
 import { getChat } from '@/lib/chatService';
 import { generateChatId } from '@/lib/chatUtils';
 import { getRandomActiveDailyId } from '@/lib/randomConnect';
@@ -134,75 +134,6 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
 
     setOnlineUsers(users);
     setLoading(false);
-  }, [currentUserId, currentDailyId]);
-
-  // Mark user as online with heartbeat
-  useEffect(() => {
-    if (!currentUserId || !currentDailyId) return;
-
-    const presenceRef = doc(db, 'presence', currentUserId);
-    let heartbeatInterval: NodeJS.Timeout;
-
-    // Mark as online with timestamp
-    const markOnline = async () => {
-      try {
-        await setDoc(
-          presenceRef,
-          {
-            userId: currentUserId,
-            isOnline: true,
-            lastSeen: serverTimestamp(),
-            lastSeenMillis: Date.now(),
-            updatedAt: serverTimestamp(),
-            dailyId: currentDailyId,
-            expiresAtMillis: getNextMidnight().getTime()
-          },
-          { merge: true }
-        );
-      } catch (error) {
-        console.error('Error marking user online:', error);
-      }
-    };
-
-    // Mark as offline
-    const markOffline = async () => {
-      try {
-        await deleteDoc(presenceRef);
-      } catch (error) {
-        console.error('Error marking user offline:', error);
-      }
-    };
-
-    // Initial mark online
-    markOnline();
-
-    // Heartbeat every 15 seconds to stay online
-    heartbeatInterval = setInterval(markOnline, 15000);
-
-    // Clean up handlers
-    const handleBeforeUnload = () => {
-      // Use sendBeacon for reliability on page unload
-      markOffline();
-    };
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        markOnline();
-        // Restart heartbeat if tab becomes visible again
-        clearInterval(heartbeatInterval);
-        heartbeatInterval = setInterval(markOnline, 15000);
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      clearInterval(heartbeatInterval);
-      markOffline();
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, [currentUserId, currentDailyId]);
 
   // Real-time listeners for presence and active IDs

@@ -11,6 +11,7 @@
   display: flex;
   gap: var(--space-lg);
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   cursor: text;
 }
@@ -96,6 +97,7 @@
   cursor: pointer;
   transition: all var(--transition-base);
   box-shadow: 0 6px 16px rgba(123, 104, 238, 0.35);
+  margin-left: var(--space-md);
 }
 
 .sendButton:focus {
@@ -139,6 +141,7 @@
   .chatInput {
     padding: var(--space-md) var(--space-lg);
     gap: var(--space-md);
+    align-items: center;
   }
 
   .textarea {
@@ -149,6 +152,7 @@
   .sendButton {
     width: 48px;
     height: 48px;
+    margin-left: var(--space-sm);
   }
 }
 
@@ -156,7 +160,7 @@
   .chatInput {
     padding: var(--space-md);
     border-radius: var(--radius-lg);
-    gap: var(--space-md);
+    gap: var(--space-sm);
   }
 
   .textarea {
@@ -168,5 +172,6 @@
     width: 44px;
     height: 44px;
     font-size: 1rem;
+    margin-left: var(--space-sm);
   }
 }
