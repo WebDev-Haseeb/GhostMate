@@ -12,6 +12,7 @@ import ActivitySummary from '@/components/Dashboard/ActivitySummary';
 import OnlineUsersList from '@/components/Dashboard/OnlineUsersList';
 import OnboardingTour from '@/components/OnboardingTour';
 import styles from '@/app/page.module.css';
+import { useNotifications } from '@/components/ui/NotificationProvider';
 
 export default function HomePageClient() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -21,6 +22,7 @@ export default function HomePageClient() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const { notify } = useNotifications();
 
   useEffect(() => {
     setMounted(true);
@@ -61,13 +63,17 @@ export default function HomePageClient() {
         if (user?.uid) {
           localStorage.removeItem(`ghostmate-onboarding-${user.uid}`);
         }
-        alert('✅ All onboarding flags cleared! Refresh (F5) to see onboarding.');
+        notify({
+          tone: 'success',
+          title: 'Onboarding reset',
+          message: 'All onboarding flags cleared. Refresh (F5) to relaunch the tour.',
+        });
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [user]);
+  }, [user, notify]);
 
   if (!isReady) {
     return (

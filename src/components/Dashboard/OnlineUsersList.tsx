@@ -9,6 +9,7 @@ import { getChat } from '@/lib/chatService';
 import { generateChatId } from '@/lib/chatUtils';
 import { getRandomActiveDailyId } from '@/lib/randomConnect';
 import styles from './OnlineUsersList.module.css';
+import { useNotifications } from '@/components/ui/NotificationProvider';
 
 interface OnlineUser {
   userId: string;
@@ -35,6 +36,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
   const [loading, setLoading] = useState(true);
   const [connectingTo, setConnectingTo] = useState<string | null>(null);
   const [randomConnecting, setRandomConnecting] = useState(false);
+  const { notify } = useNotifications();
 
   const presenceDataRef = useRef<any[]>([]);
   const dailyDataRef = useRef<any[]>([]);
@@ -277,13 +279,21 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
         if (result.success) {
           router.push(`/chat/${targetDailyId}`);
         } else {
-          alert(result.message || 'Failed to start chat');
+          notify({
+            tone: 'warning',
+            title: 'Chat limit reached',
+            message: result.message || 'Unable to start a new chat right now.',
+          });
           setConnectingTo(null);
         }
       }
     } catch (error) {
       console.error('Error connecting to user:', error);
-      alert('Failed to connect. Please try again.');
+      notify({
+        tone: 'error',
+        title: 'Connection failed',
+        message: 'We could not connect you. Please try again.',
+      });
       setConnectingTo(null);
     }
   };
@@ -307,17 +317,29 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
           if (limitResult.success) {
             router.push(`/chat/${result.dailyId}`);
           } else {
-            alert(limitResult.message || 'Failed to connect');
+            notify({
+              tone: 'warning',
+              title: 'Chat limit reached',
+              message: limitResult.message || 'Unable to start a new chat right now.',
+            });
             setRandomConnecting(false);
           }
         }
       } else {
-        alert(result.error || 'No users available');
+        notify({
+          tone: 'info',
+          title: 'No matches available',
+          message: result.error || 'No one is ready right now. Check back in a moment.',
+        });
         setRandomConnecting(false);
       }
     } catch (error) {
       console.error('Error with random connect:', error);
-      alert('Failed to connect. Please try again.');
+      notify({
+        tone: 'error',
+        title: 'Connection failed',
+        message: 'We could not connect you. Please try again.',
+      });
       setRandomConnecting(false);
     }
   };

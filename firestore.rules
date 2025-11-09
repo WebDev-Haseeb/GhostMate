@@ -25,6 +25,10 @@ service cloud.firestore {
     return request.auth != null;
   }
 
+  function participatesInConnectionId(connectionId) {
+    return isSignedIn() && connectionId.matches('.*' + request.auth.uid + '.*');
+  }
+
   match /databases/{database}/documents {
     // Admin configuration document
     match /config/admins {
@@ -53,12 +57,19 @@ service cloud.firestore {
     // Connections - users can read connections they're part of
     match /connections/{connectionId} {
       allow read: if (
-        (isSignedIn() && resource.data.userIds != null && resource.data.userIds.hasAny([request.auth.uid])) ||
-        isAdmin()
+        isAdmin() ||
+        participatesInConnectionId(connectionId) ||
+        (isSignedIn() && resource.data.userIds != null && resource.data.userIds.hasAny([request.auth.uid]))
       );
       allow write: if (
-        (isSignedIn() && request.resource.data.userIds != null && request.resource.data.userIds.hasAny([request.auth.uid])) ||
-        isAdmin()
+        isAdmin() ||
+        (
+          participatesInConnectionId(connectionId) &&
+          (
+            (request.method == 'delete' && resource.data.userIds != null && resource.data.userIds.hasAny([request.auth.uid])) ||
+            (request.resource != null && request.resource.data.userIds != null && request.resource.data.userIds.hasAny([request.auth.uid]))
+          )
+        )
       );
     }
     
