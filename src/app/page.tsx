@@ -1,166 +1,66 @@
-'use client';
+import type { Metadata } from "next";
+import HomePageClient from "@/components/pages/HomePageClient";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { useDailyId } from '@/hooks/useDailyId';
-import { useChatLimit } from '@/hooks/useChatLimit';
-import { formatTimeUntilReset } from '@/lib/chatLimitService';
-import DashboardHeader from '@/components/Dashboard/DashboardHeader';
-import DailyIdCard from '@/components/Dashboard/DailyIdCard';
-import ActivitySummary from '@/components/Dashboard/ActivitySummary';
-import OnlineUsersList from '@/components/Dashboard/OnlineUsersList';
-import OnboardingTour from '@/components/OnboardingTour';
-import styles from "./page.module.css";
+const BASE_TITLE = "GhostMate - Anonymous Conversations, Real Connections";
+const BASE_DESCRIPTION =
+  "Connect anonymously, chat freely, and disappear daily. GhostMate keeps your identity safe while you explore genuine human connections.";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://ghostmate.online";
+
+export const metadata: Metadata = {
+  title: {
+    default: BASE_TITLE,
+    template: "%s | GhostMate",
+  },
+  description: BASE_DESCRIPTION,
+  openGraph: {
+    title: BASE_TITLE,
+    description: BASE_DESCRIPTION,
+    type: "website",
+    siteName: "GhostMate",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: BASE_TITLE,
+    description: BASE_DESCRIPTION,
+  },
+};
 
 export default function Home() {
-  const { user, loading: authLoading, signOut } = useAuth();
-  const { dailyId, loading: idLoading, error, timeUntilReset } = useDailyId(user?.uid || null);
-  const chatLimit = useChatLimit(user?.uid || null);
-  const router = useRouter();
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-
-  // Prevent flash on initial mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Stable ready state - only transitions to true once, never back
-  useEffect(() => {
-    if (mounted && !authLoading && !idLoading && (user || !authLoading)) {
-      // Small delay to ensure all states are stable
-      const timer = setTimeout(() => {
-        setIsReady(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [mounted, authLoading, idLoading, user]);
-
-  // Check if this is the user's first time - SUPER PERSISTENT tracking
-  useEffect(() => {
-    if (user && !authLoading && !idLoading && dailyId) {
-      // Multiple persistence checks for bulletproof tracking
-      const onboardingCompleted = localStorage.getItem('ghostmate-onboarding-completed');
-      const onboardingTimestamp = localStorage.getItem('ghostmate-onboarding-timestamp');
-      const userOnboarding = localStorage.getItem(`ghostmate-onboarding-${user.uid}`);
-      
-      // Check all three flags - if ANY exists, don't show onboarding
-      if (!onboardingCompleted && !onboardingTimestamp && !userOnboarding) {
-        setTimeout(() => setShowOnboarding(true), 300);
-      }
-    }
-  }, [user, authLoading, idLoading, dailyId]);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, authLoading, router]);
-
-  // Dev helper: Press Shift+R to reset onboarding
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key === 'R') {
-        // Clear all onboarding flags
-        localStorage.removeItem('ghostmate-onboarding-completed');
-        localStorage.removeItem('ghostmate-onboarding-timestamp');
-        if (user?.uid) {
-          localStorage.removeItem(`ghostmate-onboarding-${user.uid}`);
-        }
-        alert('✅ All onboarding flags cleared! Refresh (F5) to see onboarding.');
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [user]);
-
-  // Show loading screen until everything is truly ready (no blink!)
-  if (!isReady) {
-    return (
-      <div className={styles.page}>
-        <main className={styles.main}>
-          <div className={styles.intro}>
-            <div className={styles.loadingSpinner}>
-              <div className={styles.ghostLoader}>
-                <img src="/favicon.svg" alt="Loading" style={{ width: '4rem', height: '4rem' }} />
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null; // Redirecting...
-  }
-
-  const handleOnboardingComplete = () => {
-    // Set multiple flags for super-persistent tracking
-    localStorage.setItem('ghostmate-onboarding-completed', 'true');
-    localStorage.setItem('ghostmate-onboarding-timestamp', Date.now().toString());
-    if (user?.uid) {
-      localStorage.setItem(`ghostmate-onboarding-${user.uid}`, 'true');
-    }
-    setShowOnboarding(false);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "GhostMate",
+    url: BASE_URL,
+    applicationCategory: "CommunicationApplication",
+    description: BASE_DESCRIPTION,
+    operatingSystem: "Web",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    inLanguage: "en",
+    creator: {
+      "@type": "Organization",
+      name: "GhostMate",
+      url: BASE_URL,
+    },
+    featureList: [
+      "Anonymous daily IDs that reset at midnight PKT",
+      "Ephemeral chat history and highlights",
+      "Realtime online presence",
+      "Story highlights curated by admins",
+    ],
   };
 
   return (
     <>
-      {/* Onboarding Tour */}
-      {showOnboarding && (
-        <OnboardingTour onComplete={handleOnboardingComplete} />
-      )}
-
-      <div className={styles.page}>
-        {/* Dashboard Header */}
-        <DashboardHeader 
-          timeUntilReset={timeUntilReset}
-          onSignOut={signOut}
-        />
-
-        <main className={styles.main}>
-          <div className={styles.container}>
-            {/* Welcome Section */}
-            <div className={styles.welcomeSection}>
-              <h1 className={styles.welcomeTitle}>Welcome to GhostMate</h1>
-              <p className={styles.welcomeSubtitle}>
-                Your anonymous, ephemeral connection platform
-              </p>
-            </div>
-
-            {/* Dashboard Grid */}
-            <div className={styles.dashboardGrid}>
-              {/* Top Row - ID Card (Left) & Online Users (Right) */}
-              <div className={styles.primaryColumn}>
-                <DailyIdCard
-                  dailyId={dailyId}
-                  loading={idLoading}
-                  error={error}
-                />
-
-                <OnlineUsersList
-                  currentUserId={user?.uid || null}
-                  currentDailyId={dailyId}
-                  chatLimit={chatLimit}
-                />
-              </div>
-
-              {/* Bottom Row - Activity Stats (Full Width) */}
-              <ActivitySummary
-                chatsUsed={chatLimit.count}
-                chatsLimit={chatLimit.limit}
-                timeUntilReset={formatTimeUntilReset(chatLimit.timeUntilReset)}
-                userId={user?.uid}
-                dailyId={dailyId}
-              />
-            </div>
-          </div>
-        </main>
-      </div>
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <HomePageClient />
     </>
   );
 }
