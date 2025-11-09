@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -125,6 +125,8 @@
 .favoriteSection {
   display: flex;
   align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 /* Warning container removed - reset time in header */
@@ -429,6 +431,7 @@
 @media (max-width: 768px) {
   .container {
     padding: var(--space-md);
+    gap: var(--space-md);
   }
 
   .header {
@@ -465,6 +468,48 @@
 
   .unavailableTips {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: var(--space-md) calc(var(--space-sm) + env(safe-area-inset-left))
+      calc(var(--space-lg) + env(safe-area-inset-bottom))
+      calc(var(--space-sm) + env(safe-area-inset-right));
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .chatInfo {
+    gap: var(--space-xxs);
+  }
+
+  .backButton {
+    padding: var(--space-xs) var(--space-md);
+    font-size: 0.8rem;
+    width: fit-content;
+  }
+
+  .resetTime {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.75rem;
+    padding: var(--space-xxs) var(--space-sm);
+  }
+
+  .favoriteSection {
+    width: 100%;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .header > *:not(:last-child) {
+    margin-bottom: 0;
   }
 }
 

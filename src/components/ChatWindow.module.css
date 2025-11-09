@@ -278,3 +278,40 @@
     font-size: 0.8rem;
   }
 }
+
+@media (max-width: 600px) {
+  .messagesContainer {
+    padding: var(--space-md) var(--space-sm);
+    gap: var(--space-xs);
+  }
+
+  .messageWrapper {
+    max-width: 100%;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .myMessage,
+  .theirMessage {
+    align-self: stretch;
+  }
+
+  .myMessage .bubble,
+  .theirMessage .bubble {
+    width: 100%;
+  }
+
+  .highlightButtonContainer {
+    margin: var(--space-xxs) 0 0;
+    order: 2;
+    justify-content: flex-end;
+  }
+
+  .myMessage .highlightButtonContainer {
+    margin: var(--space-xxs) 0 0;
+  }
+
+  .timestamp {
+    display: none;
+  }
+}

@@ -254,7 +254,8 @@
 
 @media (max-width: 480px) {
   .main {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-lg) var(--space-sm)
+      calc(var(--space-xl) + env(safe-area-inset-bottom));
   }
 
   .welcomeSection {
