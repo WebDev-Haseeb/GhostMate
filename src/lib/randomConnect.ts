@@ -12,6 +12,7 @@ import {
 import { ref, get } from 'firebase/database';
 import app, { db, database } from './firebase';
 import { getTodayMidnight } from './dailyId';
+import { ADMIN_SUPPORT_DAILY_ID, ADMIN_SUPPORT_USER_ID } from '@/config/adminSupport';
 
 /**
  * Get a random active user's daily ID
@@ -46,7 +47,10 @@ export async function getRandomActiveDailyId(
     snapshot.forEach((doc) => {
       const data = doc.data();
       // Exclude current user
-      if (data.userId !== currentUserId) {
+      const isSupportAccount =
+        data.userId === ADMIN_SUPPORT_USER_ID || doc.id === ADMIN_SUPPORT_DAILY_ID;
+
+      if (data.userId !== currentUserId && !isSupportAccount) {
         activeDailyIds.push(doc.id);
       }
     });
@@ -63,7 +67,7 @@ export async function getRandomActiveDailyId(
     
     // Filter out daily IDs already chatted with
     const availableDailyIds = activeDailyIds.filter(
-      (id) => !existingChatIds.includes(id)
+      (id) => id !== ADMIN_SUPPORT_DAILY_ID && !existingChatIds.includes(id)
     );
     
     if (availableDailyIds.length === 0) {
@@ -111,9 +115,13 @@ async function getExistingChatDailyIds(currentDailyId: string): Promise<string[]
       const [id1, id2] = chatId.split('_');
       
       if (id1 === currentDailyId) {
-        existingDailyIds.push(id2);
+        if (id2 !== ADMIN_SUPPORT_DAILY_ID) {
+          existingDailyIds.push(id2);
+        }
       } else if (id2 === currentDailyId) {
-        existingDailyIds.push(id1);
+        if (id1 !== ADMIN_SUPPORT_DAILY_ID) {
+          existingDailyIds.push(id1);
+        }
       }
     });
     

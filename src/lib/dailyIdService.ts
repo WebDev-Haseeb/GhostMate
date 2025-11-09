@@ -6,6 +6,12 @@
 import { doc, getDoc, setDoc, query, collection, where, getDocs } from 'firebase/firestore';
 import { generateDailyId, getTodayMidnight, getNextMidnight, isIdExpired } from './dailyId';
 import { db } from './firebase';
+import {
+  ADMIN_SUPPORT_DAILY_ID,
+  ADMIN_SUPPORT_USER_ID,
+  isAdminSupportDailyId,
+  isAdminSupportUserId,
+} from '@/config/adminSupport';
 
 export interface DailyIdRecord {
   dailyId: string;
@@ -41,6 +47,9 @@ async function isDailyIdTaken(dailyId: string): Promise<boolean> {
 async function generateUniqueDailyId(maxAttempts = 5): Promise<string> {
   for (let i = 0; i < maxAttempts; i++) {
     const id = generateDailyId();
+    if (isAdminSupportDailyId(id)) {
+      continue;
+    }
     const isTaken = await isDailyIdTaken(id);
     
     if (!isTaken) {
@@ -58,6 +67,15 @@ async function generateUniqueDailyId(maxAttempts = 5): Promise<string> {
  */
 export async function getUserDailyId(userId: string): Promise<DailyIdRecord | null> {
   try {
+    if (isAdminSupportUserId(userId)) {
+      return {
+        dailyId: ADMIN_SUPPORT_DAILY_ID,
+        userId: ADMIN_SUPPORT_USER_ID,
+        createdAt: new Date(0),
+        expiresAt: new Date('2999-12-31T00:00:00.000Z'),
+      };
+    }
+
     const userDocRef = doc(db, 'users', userId);
     const userDoc = await getDoc(userDocRef);
     
@@ -131,6 +149,9 @@ export async function createDailyId(userId: string): Promise<string> {
  */
 export async function getOrCreateDailyId(userId: string): Promise<string> {
   try {
+    if (isAdminSupportUserId(userId)) {
+      return ADMIN_SUPPORT_DAILY_ID;
+    }
     // Try to get existing ID
     const existingId = await getUserDailyId(userId);
     
@@ -152,6 +173,9 @@ export async function getOrCreateDailyId(userId: string): Promise<string> {
  */
 export async function refreshDailyId(userId: string): Promise<string> {
   try {
+    if (isAdminSupportUserId(userId)) {
+      return ADMIN_SUPPORT_DAILY_ID;
+    }
     const newId = await createDailyId(userId);
     return newId;
   } catch (error) {
@@ -166,6 +190,9 @@ export async function refreshDailyId(userId: string): Promise<string> {
  */
 export async function getUserIdFromDailyId(dailyId: string): Promise<string | null> {
   try {
+    if (isAdminSupportDailyId(dailyId)) {
+      return ADMIN_SUPPORT_USER_ID;
+    }
     const dailyIdDocRef = doc(db, 'dailyIds', dailyId);
     const dailyIdDoc = await getDoc(dailyIdDocRef);
     

@@ -13,6 +13,10 @@ import ChatWindow from './ChatWindow';
 import ChatInput from './ChatInput';
 import FavoriteButton from './FavoriteButton';
 import styles from './ChatContainer.module.css';
+import {
+  ADMIN_SUPPORT_DISPLAY_NAME,
+  isAdminSupportDailyId,
+} from '@/config/adminSupport';
 
 interface ChatContainerProps {
   otherDailyId: string;
@@ -23,6 +27,7 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
   const { user, loading: authLoading } = useAuth();
   const { dailyId, loading: idLoading } = useDailyId(user?.uid || null);
   const timeUntilReset = useTimeUntilReset();
+  const isSupportChat = isAdminSupportDailyId(otherDailyId);
   const { 
     messages, 
     loading: chatLoading, 
@@ -70,7 +75,13 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
       setOtherUserIdLoading(false);
       return;
     }
-    
+
+    if (isSupportChat) {
+      setOtherUserId(null);
+      setOtherUserIdLoading(false);
+      return;
+    }
+
     setOtherUserIdLoading(true);
     setOtherUserIdError(null);
     
@@ -244,18 +255,20 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
           ← Back
         </button>
         <div className={`${styles.chatInfo} ${styles.headerInfo}`}>
-          <h2>Anonymous Chat</h2>
+          <h2>{isSupportChat ? ADMIN_SUPPORT_DISPLAY_NAME : 'Anonymous Chat'}</h2>
           <div className={styles.subtitle}>
             <span className={styles.statusIndicator}></span>
-            ID: {otherDailyId}
+            {isSupportChat ? 'Support Channel' : `ID: ${otherDailyId}`}
           </div>
         </div>
         <div className={`${styles.favoriteSection} ${styles.headerActions}`}>
-          <FavoriteButton
-            userId={user?.uid || null}
-            userDailyId={dailyId}
-            targetDailyId={otherDailyId}
-          />
+          {!isSupportChat && (
+            <FavoriteButton
+              userId={user?.uid || null}
+              userDailyId={dailyId}
+              targetDailyId={otherDailyId}
+            />
+          )}
         </div>
       </header>
 
@@ -271,18 +284,18 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
         messages={messages}
         myDailyId={dailyId}
         otherDailyId={otherDailyId}
-        userId={user?.uid || undefined}
-        otherUserId={otherUserId || undefined}
-        chatId={chatId || undefined}
-        highlightStatuses={highlightStatuses}
-        onToggleHighlight={toggleHighlight}
+        userId={!isSupportChat ? (user?.uid || undefined) : undefined}
+        otherUserId={!isSupportChat ? (otherUserId || undefined) : undefined}
+        chatId={!isSupportChat ? (chatId || undefined) : undefined}
+        highlightStatuses={!isSupportChat ? highlightStatuses : undefined}
+        onToggleHighlight={!isSupportChat ? toggleHighlight : undefined}
       />
 
       {/* Chat Input */}
       <ChatInput 
         onSend={sendMessage}
         disabled={sending}
-        placeholder="Type a message..."
+        placeholder={isSupportChat ? 'Ask GhostMate Support anything...' : 'Type a message...'}
       />
     </div>
   );

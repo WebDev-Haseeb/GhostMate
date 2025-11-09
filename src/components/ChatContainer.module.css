@@ -155,6 +155,35 @@
   flex-wrap: wrap;
 }
 
+.resetBar {
+  margin: var(--space-sm) auto;
+  padding: 0.4rem 1.5rem;
+  border-radius: 999px;
+  background: rgba(123, 104, 238, 0.16);
+  border: 1px solid rgba(123, 104, 238, 0.35);
+  color: rgba(255, 255, 255, 0.88);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 8px 22px rgba(123, 104, 238, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  min-width: 220px;
+}
+
+.resetLabel {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.resetValue {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+}
+
 /* Warning container removed - reset time in header */
 
 /* Loading state - MATCHING DASHBOARD */
@@ -534,32 +563,5 @@
     justify-content: flex-end;
     gap: var(--space-xs);
   }
-
-.resetBar {
-  margin: 0 auto;
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-lg);
-  background: rgba(123, 104, 238, 0.12);
-  border: 1px solid rgba(123, 104, 238, 0.25);
-  color: rgba(255, 255, 255, 0.8);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  box-shadow: 0 6px 18px rgba(123, 104, 238, 0.18);
-}
-
-.resetLabel {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.resetValue {
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-}
 }
 

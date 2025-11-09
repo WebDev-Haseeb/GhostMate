@@ -10,12 +10,20 @@ import { generateChatId } from '@/lib/chatUtils';
 import { getRandomActiveDailyId } from '@/lib/randomConnect';
 import styles from './OnlineUsersList.module.css';
 import { useNotifications } from '@/components/ui/NotificationProvider';
+import {
+  ADMIN_SUPPORT_DAILY_ID,
+  ADMIN_SUPPORT_DISPLAY_NAME,
+  ADMIN_SUPPORT_USER_ID,
+  isAdminSupportDailyId,
+} from '@/config/adminSupport';
 
 interface OnlineUser {
   userId: string;
   dailyId: string;
   createdAt: number;
   isActive: boolean;
+  isSupportAgent?: boolean;
+  displayName?: string;
 }
 
 interface OnlineUsersListProps {
@@ -130,6 +138,28 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
       });
     });
 
+    if (!usersMap.has(ADMIN_SUPPORT_USER_ID)) {
+      usersMap.set(ADMIN_SUPPORT_USER_ID, {
+        userId: ADMIN_SUPPORT_USER_ID,
+        dailyId: ADMIN_SUPPORT_DAILY_ID,
+        createdAt: Number.MAX_SAFE_INTEGER,
+        isActive: true,
+        isSupportAgent: true,
+        displayName: ADMIN_SUPPORT_DISPLAY_NAME,
+      });
+    } else {
+      const admin = usersMap.get(ADMIN_SUPPORT_USER_ID);
+      if (admin) {
+        usersMap.set(ADMIN_SUPPORT_USER_ID, {
+          ...admin,
+          isSupportAgent: true,
+          displayName: ADMIN_SUPPORT_DISPLAY_NAME,
+          createdAt: Number.MAX_SAFE_INTEGER,
+          isActive: true,
+        });
+      }
+    }
+
     const users = Array.from(usersMap.values()).sort((a, b) => b.createdAt - a.createdAt);
 
     setOnlineUsers(users);
@@ -194,7 +224,10 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
   }, [currentUserId, currentDailyId, computeOnlineUsers]);
 
   const handleConnect = async (targetDailyId: string) => {
-    if (!currentDailyId || chatLimit.isLimitReached) return;
+    if (!currentDailyId) return;
+
+    const isSupportChat = isAdminSupportDailyId(targetDailyId);
+    if (chatLimit.isLimitReached && !isSupportChat) return;
 
     setConnectingTo(targetDailyId);
 
@@ -203,20 +236,22 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
       const chatId = generateChatId(currentDailyId, targetDailyId);
       const existingChat = await getChat(chatId);
 
-      if (existingChat) {
+      if (existingChat || isSupportChat) {
+        router.push(`/chat/${targetDailyId}`);
+        setConnectingTo(null);
+        return;
+      }
+
+      const result = await chatLimit.recordChatInitiation();
+      if (result.success) {
         router.push(`/chat/${targetDailyId}`);
       } else {
-        const result = await chatLimit.recordChatInitiation();
-        if (result.success) {
-          router.push(`/chat/${targetDailyId}`);
-        } else {
-          notify({
-            tone: 'warning',
-            title: 'Chat limit reached',
-            message: result.message || 'Unable to start a new chat right now.',
-          });
-          setConnectingTo(null);
-        }
+        notify({
+          tone: 'warning',
+          title: 'Chat limit reached',
+          message: result.message || 'Unable to start a new chat right now.',
+        });
+        setConnectingTo(null);
       }
     } catch (error) {
       console.error('Error connecting to user:', error);
@@ -326,14 +361,14 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
               <button
                 key={user.dailyId}
                 onClick={() => handleConnect(user.dailyId)}
-                disabled={chatLimit.isLimitReached || connectingTo === user.dailyId}
+                disabled={(chatLimit.isLimitReached && !user.isSupportAgent) || connectingTo === user.dailyId}
                 className={`${styles.userCard} ${connectingTo === user.dailyId ? styles.connecting : ''}`}
               >
                 <div className={styles.userIcon}>
                   <img src="/favicon.svg" alt="" style={{ width: '2.5rem', height: '2.5rem', opacity: 0.5 }} />
                 </div>
                 <div className={styles.userId}>
-                  {formatDailyId(user.dailyId)}
+                  {user.displayName ?? formatDailyId(user.dailyId)}
                 </div>
                 <div className={styles.userStatus}>
                   {connectingTo === user.dailyId ? (
@@ -344,7 +379,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
                   ) : (
                     <>
                       <span className={styles.onlineDot}></span>
-                      <span>Online</span>
+                      <span>{user.isSupportAgent ? 'Support' : 'Online'}</span>
                     </>
                   )}
                 </div>

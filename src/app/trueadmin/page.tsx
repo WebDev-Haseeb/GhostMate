@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { getQueuedStories, approveStory, rejectStory } from '@/lib/storiesService';
@@ -19,7 +20,19 @@ import {
 } from '@/lib/adminMaintenance';
 import { QueuedStory } from '@/types/highlights';
 import styles from './admin.module.css';
-import { auth } from '@/lib/firebase';
+import { auth, database } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
+import { Chat, Message } from '@/types/chat';
+import { listenToMessages, sendMessage as sendChatMessage } from '@/lib/chatService';
+import { ADMIN_SUPPORT_DAILY_ID, ADMIN_SUPPORT_DISPLAY_NAME } from '@/config/adminSupport';
+import { formatDailyId } from '@/lib/dailyId';
+
+interface SupportChatSummary {
+  chatId: string;
+  otherDailyId: string;
+  lastMessage?: string;
+  lastMessageTimestamp?: number;
+}
 
 export default function TrueAdminPanel() {
   const router = useRouter();
@@ -31,6 +44,14 @@ export default function TrueAdminPanel() {
   const [maintenanceLoading, setMaintenanceLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [supportChats, setSupportChats] = useState<SupportChatSummary[]>([]);
+  const [supportLoading, setSupportLoading] = useState(true);
+  const [supportMessagesLoading, setSupportMessagesLoading] = useState(false);
+  const [supportMessages, setSupportMessages] = useState<Message[]>([]);
+  const [selectedSupportChatId, setSelectedSupportChatId] = useState<string | null>(null);
+  const [supportInput, setSupportInput] = useState('');
+  const [supportSending, setSupportSending] = useState(false);
+  const [supportError, setSupportError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -262,6 +283,147 @@ export default function TrueAdminPanel() {
     router.push('/trueadmin/login');
   };
 
+  useEffect(() => {
+    if (!isAdmin) {
+      setSupportChats([]);
+      setSupportMessages([]);
+      setSupportLoading(false);
+      return;
+    }
+
+    setSupportLoading(true);
+    const chatsRef = ref(database, 'chats');
+
+    const unsubscribe = onValue(
+      chatsRef,
+      (snapshot) => {
+        const collected: SupportChatSummary[] = [];
+
+        snapshot.forEach((child) => {
+          const chat = child.val() as Chat;
+          if (!chat.participants || !chat.participants[ADMIN_SUPPORT_DAILY_ID]) {
+            return;
+          }
+
+          const chatId = child.key || chat.chatId;
+          if (!chatId) {
+            return;
+          }
+
+          const otherDailyId =
+            chat.participantIds?.find((id) => id !== ADMIN_SUPPORT_DAILY_ID) ||
+            Object.keys(chat.participants).find((id) => id !== ADMIN_SUPPORT_DAILY_ID) ||
+            'UNKNOWN';
+
+          collected.push({
+            chatId,
+            otherDailyId,
+            lastMessage: chat.lastMessage,
+            lastMessageTimestamp: chat.lastMessageTimestamp || chat.updatedAt || chat.createdAt,
+          });
+        });
+
+        collected.sort((a, b) => (b.lastMessageTimestamp ?? 0) - (a.lastMessageTimestamp ?? 0));
+        setSupportChats(collected);
+        setSupportLoading(false);
+        setSelectedSupportChatId((current) => {
+          if (current && collected.some((chat) => chat.chatId === current)) {
+            return current;
+          }
+          return collected.length > 0 ? collected[0].chatId : null;
+        });
+      },
+      (err) => {
+        console.error('Error loading support chats:', err);
+        setSupportError(err.message || 'Failed to load support conversations');
+        setSupportChats([]);
+        setSupportLoading(false);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin || !selectedSupportChatId) {
+      setSupportMessages([]);
+      setSupportMessagesLoading(false);
+      return;
+    }
+
+    setSupportMessagesLoading(true);
+    const unsubscribe = listenToMessages(selectedSupportChatId, (msgs) => {
+      setSupportMessages(msgs);
+      setSupportMessagesLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isAdmin, selectedSupportChatId]);
+
+  const selectedSupportChat = useMemo(
+    () => supportChats.find((chat) => chat.chatId === selectedSupportChatId) || null,
+    [supportChats, selectedSupportChatId]
+  );
+
+  const supportConversationTitle = selectedSupportChat
+    ? `Chat with ${formatDailyId(selectedSupportChat.otherDailyId)}`
+    : 'Select a conversation';
+
+  const formatRelativeTime = (timestamp?: number) => {
+    if (!timestamp) {
+      return 'Unknown';
+    }
+
+    const now = Date.now();
+    const diff = Math.max(0, now - timestamp);
+    const minutes = Math.floor(diff / (1000 * 60));
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr${hours === 1 ? '' : 's'} ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 4) return `${weeks} wk${weeks === 1 ? '' : 's'} ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} mo${months === 1 ? '' : 's'} ago`;
+    const years = Math.floor(days / 365);
+    return `${years} yr${years === 1 ? '' : 's'} ago`;
+  };
+
+  const handleSendSupportMessage = async () => {
+    if (!selectedSupportChat || !supportInput.trim()) {
+      return;
+    }
+
+    try {
+      setSupportSending(true);
+      setSupportError(null);
+      const text = supportInput.trim();
+      await sendChatMessage(selectedSupportChat.chatId, ADMIN_SUPPORT_DAILY_ID, {
+        text,
+        recipientId: selectedSupportChat.otherDailyId,
+      });
+      setSupportInput('');
+    } catch (err: any) {
+      console.error('Error sending support reply:', err);
+      setSupportError(err.message || 'Failed to send reply');
+    } finally {
+      setSupportSending(false);
+    }
+  };
+
+  const handleSupportInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSendSupportMessage();
+    }
+  };
+
   // Loading state
   if (checking || loading) {
     return (
@@ -345,6 +507,119 @@ export default function TrueAdminPanel() {
             >
               {maintenanceLoading === 'deleteAllData' ? 'Wiping…' : 'Full Data Wipe'}
             </button>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.supportSection}>
+        <h2 className={styles.sectionTitle}>{ADMIN_SUPPORT_DISPLAY_NAME} Inbox</h2>
+        <div className={styles.supportLayout}>
+          <aside className={styles.supportSidebar}>
+            {supportLoading ? (
+              <div className={styles.supportLoading}>Loading conversations…</div>
+            ) : supportChats.length === 0 ? (
+              <div className={styles.supportEmpty}>
+                <span>📭</span>
+                <p>No support conversations yet.</p>
+                <p className={styles.supportHint}>They’ll appear here when users contact support.</p>
+              </div>
+            ) : (
+              <div className={styles.supportChatList}>
+                {supportChats.map((chat) => (
+                  <button
+                    key={chat.chatId}
+                    className={`${styles.supportChatButton} ${
+                      selectedSupportChatId === chat.chatId ? styles.supportChatButtonActive : ''
+                    }`}
+                    onClick={() => setSelectedSupportChatId(chat.chatId)}
+                  >
+                    <div className={styles.supportChatHeading}>
+                      <span className={styles.supportChatTitle}>
+                        {formatDailyId(chat.otherDailyId)}
+                      </span>
+                      <span className={styles.supportTimestamp}>
+                        {formatRelativeTime(chat.lastMessageTimestamp)}
+                      </span>
+                    </div>
+                    {chat.lastMessage && (
+                      <p className={styles.supportChatPreview}>{chat.lastMessage}</p>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </aside>
+          <div className={styles.supportConversation}>
+            <header className={styles.supportConversationHeader}>
+              <h3>{supportConversationTitle}</h3>
+              {selectedSupportChat && (
+                <span className={styles.supportConversationSubtext}>
+                  Daily ID: {selectedSupportChat.otherDailyId}
+                </span>
+              )}
+            </header>
+
+            {supportError && (
+              <div className={styles.supportError}>
+                <span>⚠️</span>
+                <p>{supportError}</p>
+              </div>
+            )}
+
+            <div className={styles.supportMessages}>
+              {supportMessagesLoading ? (
+                <div className={styles.supportLoading}>Loading messages…</div>
+              ) : !selectedSupportChat ? (
+                <div className={styles.supportEmptyConversation}>
+                  <span>👻</span>
+                  <p>Select a conversation to review messages.</p>
+                </div>
+              ) : supportMessages.length === 0 ? (
+                <div className={styles.supportEmptyConversation}>
+                  <span>✨</span>
+                  <p>No messages yet. Say hello!</p>
+                </div>
+              ) : (
+                supportMessages.map((message) => {
+                  const isAdminMessage = message.senderId === ADMIN_SUPPORT_DAILY_ID;
+                  return (
+                    <div
+                      key={message.id}
+                      className={`${styles.supportMessage} ${
+                        isAdminMessage ? styles.supportMessageAdmin : styles.supportMessageUser
+                      }`}
+                    >
+                      <div className={styles.supportMessageBubble}>
+                        <p>{message.text}</p>
+                        <span className={styles.supportMessageMeta}>
+                          {isAdminMessage ? ADMIN_SUPPORT_DISPLAY_NAME : formatDailyId(message.senderId)} ·{' '}
+                          {formatRelativeTime(message.timestamp)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className={styles.supportComposer}>
+              <textarea
+                className={styles.supportComposerInput}
+                placeholder={selectedSupportChat ? 'Type a reply…' : 'Select a conversation to respond.'}
+                value={supportInput}
+                onChange={(event) => setSupportInput(event.target.value)}
+                onKeyDown={handleSupportInputKeyDown}
+                disabled={!selectedSupportChat || supportSending}
+                rows={3}
+              />
+              <button
+                className={styles.supportComposerButton}
+                onClick={handleSendSupportMessage}
+                disabled={!selectedSupportChat || supportSending || supportInput.trim().length === 0}
+              >
+                {supportSending ? 'Sending…' : 'Send Reply'}
+              </button>
+            </div>
           </div>
         </div>
       </section>

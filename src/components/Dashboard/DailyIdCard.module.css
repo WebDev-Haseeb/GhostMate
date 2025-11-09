@@ -166,6 +166,8 @@
   transition: all var(--transition-base);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  justify-items: flex-start;
+  text-align: left;
 }
 
 .actionButton:hover:not(:disabled) {
@@ -208,6 +210,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  width: 100%;
 }
 
 .buttonPrimaryText {
