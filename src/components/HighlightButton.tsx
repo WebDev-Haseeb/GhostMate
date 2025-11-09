@@ -18,17 +18,22 @@ export default function HighlightButton({
   disabled = false
 }: HighlightButtonProps) {
   const [loading, setLoading] = useState(false);
+  const [pendingState, setPendingState] = useState<'pending-on' | 'pending-off' | null>(null);
 
   const handleClick = async () => {
     if (loading || disabled) return;
 
+    const targetState = status.highlightedByMe ? 'pending-off' : 'pending-on';
+    setPendingState(targetState);
     setLoading(true);
     try {
       await onToggle();
     } catch (error) {
       console.error('Error toggling highlight:', error);
+      setPendingState(null);
     } finally {
       setLoading(false);
+      setTimeout(() => setPendingState(null), 120);
     }
   };
 
@@ -78,20 +83,39 @@ export default function HighlightButton({
 
   const buttonState = getButtonState();
   const isLocked = status.isLocked;
+  const isPending = pendingState !== null;
+  const showPendingFill = pendingState === 'pending-on';
+
+  const pendingClass =
+    pendingState === 'pending-on'
+      ? styles.pendingOn
+      : pendingState === 'pending-off'
+        ? styles.pendingOff
+        : '';
+
+  const buttonClassName = [
+    styles.highlightButton,
+    buttonState.className,
+    loading ? styles.loading : '',
+    disabled ? styles.disabled : '',
+    isLocked ? styles.locked : '',
+    isPending ? styles.pending : '',
+    pendingClass
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <button
       onClick={handleClick}
       disabled={disabled || loading || (isLocked && status.highlightedByMe)}
-      className={`${styles.highlightButton} ${buttonState.className} ${
-        loading ? styles.loading : ''
-      } ${disabled ? styles.disabled : ''} ${
-        isLocked ? styles.locked : ''
-      }`}
+      className={buttonClassName}
       title={buttonState.title}
       aria-label={buttonState.label}
     >
-      <span className={styles.icon}>{buttonState.icon}</span>
+      <span className={styles.icon}>
+        {showPendingFill ? '⭐' : buttonState.icon}
+      </span>
       {isLocked && <span className={styles.lockIcon}>🔒</span>}
     </button>
   );

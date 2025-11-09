@@ -15,6 +15,7 @@ import {
   listenToMessageHighlightStatus,
   getUserHighlight
 } from '@/lib/highlightsService';
+import { logAnalyticsEvent } from '@/lib/analytics';
 import { sendSystemMessage } from '@/lib/chatService';
 import type {
   MessageHighlightStatus,
@@ -107,7 +108,7 @@ export function useHighlights({
         // Check if already highlighted
         const existingHighlight = await getUserHighlight(userId, messageId);
 
-        if (existingHighlight) {
+         if (existingHighlight) {
           // Remove highlight
           const result = await removeHighlight(userId, messageId, chatId);
           
@@ -118,6 +119,11 @@ export function useHighlights({
               chatId,
               `☆ ${myDailyId} removed a highlight`
             );
+             logAnalyticsEvent('highlight_remove', {
+               chat_id: chatId,
+               message_id: messageId,
+               user_id: userId
+             });
           }
         } else {
           // Add highlight
@@ -142,6 +148,12 @@ export function useHighlights({
               chatId,
               `⭐ ${myDailyId} highlighted a message`
             );
+             logAnalyticsEvent('highlight_add', {
+               chat_id: chatId,
+               message_id: messageId,
+               user_id: userId,
+               mutual: result.mutualHighlight ?? false
+             });
           }
           // Note: Mutual highlights are automatically queued for admin review
         }

@@ -17,6 +17,7 @@ import {
 } from '@/lib/favoritesService';
 import { getUserIdFromDailyId } from '@/lib/dailyIdService';
 import { Connection } from '@/types/favorites';
+import { logAnalyticsEvent } from '@/lib/analytics';
 
 interface UseFavoriteProps {
   userId: string | null;
@@ -143,9 +144,10 @@ export function useFavorite({
       setToggling(true);
       setError(null);
 
+      const wasFavorited = isFavorited;
       let result: FavoriteActionResult;
 
-      if (isFavorited) {
+      if (wasFavorited) {
         // Remove favorite
         result = await removeFavoriteService(userId, targetDailyId, userDailyId);
       } else {
@@ -159,7 +161,7 @@ export function useFavorite({
       }
 
       if (result.success) {
-        setIsFavorited(!isFavorited);
+        setIsFavorited(!wasFavorited);
         
         // If mutual connection was established
         if (result.mutualConnection && result.connectionToken) {
@@ -167,6 +169,19 @@ export function useFavorite({
           setIsLocked(result.isLocked || false);
           setLockExpiresAt(result.lockExpiresAt || null);
         }
+
+        logAnalyticsEvent(
+          result.mutualConnection
+            ? 'favorite_mutual'
+            : wasFavorited
+              ? 'favorite_removed'
+              : 'favorite_added',
+          {
+          user_id: userId,
+          target_daily_id: targetDailyId,
+          mutual: result.mutualConnection ?? false,
+          locked: result.isLocked ?? false
+        });
       } else {
         setError(result.message || 'Action failed');
         
