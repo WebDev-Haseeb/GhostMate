@@ -8,7 +8,8 @@ import {
   createOrGetChat, 
   sendMessage as sendMessageService, 
   listenToMessages,
-  getChat 
+  getChat,
+  resetUnreadCount
 } from '@/lib/chatService';
 
 interface UseChatProps {
@@ -82,6 +83,34 @@ export function useChat({ myDailyId, otherDailyId }: UseChatProps): UseChatRetur
       unsubscribe();
     };
   }, [chatId]);
+
+  useEffect(() => {
+    if (!chatId || !myDailyId) {
+      return;
+    }
+
+    const markAsRead = () => {
+      resetUnreadCount(chatId, myDailyId).catch((err) => {
+        console.error('Failed to reset unread count:', err);
+      });
+    };
+
+    markAsRead();
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        markAsRead();
+      }
+    };
+
+    window.addEventListener('focus', markAsRead);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', markAsRead);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [chatId, myDailyId]);
 
   // Send message
   const sendMessage = useCallback(async (text: string) => {

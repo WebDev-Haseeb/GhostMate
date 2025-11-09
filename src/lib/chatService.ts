@@ -4,7 +4,7 @@
  */
 
 import { database } from './firebase';
-import { ref, push, set, update, onValue, off, query, orderByChild, get } from 'firebase/database';
+import { ref, push, set, update, onValue, off, query, orderByChild, get, runTransaction } from 'firebase/database';
 import { Chat, Message, NewMessage } from '@/types/chat';
 import { generateChatId, sanitizeMessageText, isValidMessage } from './chatUtils';
 import { getTodayMidnight } from './dailyId';
@@ -75,6 +75,18 @@ export async function sendMessage(
     lastMessage: sanitizedText.substring(0, 100), // First 100 chars for preview
     lastMessageTimestamp: Date.now(),
     updatedAt: Date.now()
+  });
+
+  const recipientId = message.recipientId;
+  const unreadRef = ref(database, `chats/${chatId}/unreadCounts/${recipientId}`);
+  const transactionResult = await runTransaction(unreadRef, (current) => (current || 0) + 1);
+  const newUnreadCount = transactionResult.snapshot?.val() ?? 0;
+
+  const rootRef = ref(database);
+  await update(rootRef, {
+    [`userUnread/${recipientId}/${chatId}`]: newUnreadCount,
+    [`userUnread/${senderId}/${chatId}`]: 0,
+    [`chats/${chatId}/unreadCounts/${senderId}`]: 0
   });
 }
 
@@ -159,6 +171,14 @@ export async function getChat(chatId: string): Promise<Chat | null> {
   }
   
   return snapshot.val() as Chat;
+}
+
+export async function resetUnreadCount(chatId: string, dailyId: string): Promise<void> {
+  const rootRef = ref(database);
+  await update(rootRef, {
+    [`chats/${chatId}/unreadCounts/${dailyId}`]: 0,
+    [`userUnread/${dailyId}/${chatId}`]: 0
+  });
 }
 
 /**

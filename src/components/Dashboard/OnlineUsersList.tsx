@@ -3,10 +3,10 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, Timestamp, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, database } from '@/lib/firebase';
 import { formatDailyId } from '@/lib/dailyId';
 import { getChat } from '@/lib/chatService';
-import { generateChatId } from '@/lib/chatUtils';
+import { generateChatId, getOtherParticipantId } from '@/lib/chatUtils';
 import { getRandomActiveDailyId } from '@/lib/randomConnect';
 import styles from './OnlineUsersList.module.css';
 import { useNotifications } from '@/components/ui/NotificationProvider';
@@ -16,6 +16,7 @@ import {
   ADMIN_SUPPORT_USER_ID,
   isAdminSupportDailyId,
 } from '@/config/adminSupport';
+import { ref as realtimeRef, onValue } from 'firebase/database';
 
 interface OnlineUser {
   userId: string;
@@ -24,6 +25,7 @@ interface OnlineUser {
   isActive: boolean;
   isSupportAgent?: boolean;
   displayName?: string;
+  unreadCount?: number;
 }
 
 interface OnlineUsersListProps {
@@ -45,6 +47,8 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
   const [connectingTo, setConnectingTo] = useState<string | null>(null);
   const [randomConnecting, setRandomConnecting] = useState(false);
   const { notify } = useNotifications();
+  const unreadCountsRef = useRef<Record<string, number>>({});
+  const unreadInitialLoadRef = useRef(true);
 
   const presenceDataRef = useRef<any[]>([]);
   const dailyDataRef = useRef<any[]>([]);
@@ -135,6 +139,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
         dailyId,
         createdAt,
         isActive: true,
+        unreadCount: unreadCountsRef.current[generateChatId(currentDailyId, dailyId)] ?? 0,
       });
     });
 
@@ -146,6 +151,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
         isActive: true,
         isSupportAgent: true,
         displayName: ADMIN_SUPPORT_DISPLAY_NAME,
+        unreadCount: unreadCountsRef.current[generateChatId(currentDailyId, ADMIN_SUPPORT_DAILY_ID)] ?? 0,
       });
     } else {
       const admin = usersMap.get(ADMIN_SUPPORT_USER_ID);
@@ -156,6 +162,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
           displayName: ADMIN_SUPPORT_DISPLAY_NAME,
           createdAt: Number.MAX_SAFE_INTEGER,
           isActive: true,
+          unreadCount: unreadCountsRef.current[generateChatId(currentDailyId, ADMIN_SUPPORT_DAILY_ID)] ?? 0,
         });
       }
     }
@@ -223,6 +230,54 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
     };
   }, [currentUserId, currentDailyId, computeOnlineUsers]);
 
+  useEffect(() => {
+    if (!currentDailyId) {
+      unreadCountsRef.current = {};
+      return;
+    }
+
+    const userUnreadRef = realtimeRef(database, `userUnread/${currentDailyId}`);
+
+    const unsubscribe = onValue(
+      userUnreadRef,
+      (snapshot) => {
+        const snapshotValue = snapshot.val() as Record<string, number | string> | null;
+        const dataEntries = Object.entries(snapshotValue ?? {});
+        const normalizedEntries = dataEntries.map<[string, number]>(([chatId, count]) => [
+          chatId,
+          typeof count === 'number' ? count : Number(count) || 0,
+        ]);
+        const data = Object.fromEntries(normalizedEntries);
+        const previous = unreadCountsRef.current;
+
+        const isInitialLoad = unreadInitialLoadRef.current;
+
+        Object.entries(data).forEach(([chatId, count]) => {
+          const prev = previous[chatId] ?? 0;
+          if (!isInitialLoad && count > prev) {
+            const otherDailyId = getOtherParticipantId(chatId, currentDailyId);
+            notify({
+              tone: 'info',
+              title: 'New message',
+              message: `Message from ${formatDailyId(otherDailyId)}`,
+            });
+          }
+        });
+
+        unreadInitialLoadRef.current = false;
+        unreadCountsRef.current = data;
+        computeOnlineUsers();
+      },
+      (error) => {
+        console.error('Error listening to unread counts:', error);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [currentDailyId, notify, computeOnlineUsers]);
+
   const handleConnect = async (targetDailyId: string) => {
     if (!currentDailyId) return;
 
@@ -277,10 +332,12 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
         const existingChat = await getChat(chatId);
 
         if (existingChat) {
+          setRandomConnecting(false);
           router.push(`/chat/${result.dailyId}`);
         } else {
           const limitResult = await chatLimit.recordChatInitiation();
           if (limitResult.success) {
+            setRandomConnecting(false);
             router.push(`/chat/${result.dailyId}`);
           } else {
             notify({
@@ -364,12 +421,17 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
                 disabled={(chatLimit.isLimitReached && !user.isSupportAgent) || connectingTo === user.dailyId}
                 className={`${styles.userCard} ${connectingTo === user.dailyId ? styles.connecting : ''}`}
               >
+                {(user.unreadCount ?? 0) > 0 && (
+                  <span className={styles.unreadBadge}>
+                    {user.unreadCount > 3 ? '3+' : user.unreadCount}
+                  </span>
+                )}
                 <div className={styles.userIcon}>
                   <img src="/favicon.svg" alt="" style={{ width: '2.5rem', height: '2.5rem', opacity: 0.5 }} />
                 </div>
-                <div className={styles.userId}>
+                <span className={styles.userId}>
                   {user.displayName ?? formatDailyId(user.dailyId)}
-                </div>
+                </span>
                 <div className={styles.userStatus}>
                   {connectingTo === user.dailyId ? (
                     <>

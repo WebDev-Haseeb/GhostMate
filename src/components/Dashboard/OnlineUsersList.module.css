@@ -328,6 +328,26 @@
   background-clip: text;
 }
 
+.unreadBadge {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 99, 132, 0.92), rgba(255, 167, 38, 0.88));
+  color: #0d0d1f;
+  font-size: 0.65rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(255, 99, 132, 0.35);
+  text-transform: uppercase;
+  line-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .userStatus {
   display: flex;
   align-items: center;
