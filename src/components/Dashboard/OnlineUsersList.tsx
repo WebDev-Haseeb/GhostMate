@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, doc, setDoc, deleteDoc, Timestamp, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { formatDailyId } from '@/lib/dailyId';
+import { formatDailyId, getNextMidnight } from '@/lib/dailyId';
 import { getChat } from '@/lib/chatService';
 import { generateChatId } from '@/lib/chatUtils';
 import { getRandomActiveDailyId } from '@/lib/randomConnect';
@@ -55,61 +55,80 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
     const now = Date.now();
     const STALE_THRESHOLD = 180000; // 3 minutes to tolerate background tab throttling
 
-    const onlineUserIds = new Set<string>();
-    presenceDataRef.current.forEach((entry: any) => {
-      const userId = entry.userId;
-      const lastSeenValue = entry.lastSeen?.toMillis
-        ? entry.lastSeen.toMillis()
-        : typeof entry.lastSeen === 'number'
-          ? entry.lastSeen
-          : entry.lastSeen?.toDate
-            ? entry.lastSeen.toDate().getTime()
-            : 0;
+    const dailyLookup = new Map<
+      string,
+      { dailyId: string; expiresAtMillis: number; createdAt: number }
+    >();
 
-      if (
-        userId &&
-        userId !== currentUserId &&
-        now - lastSeenValue < STALE_THRESHOLD
-      ) {
-        onlineUserIds.add(userId);
+    dailyDataRef.current.forEach((entry: any) => {
+      const expiresAt = entry.expiresAt;
+      let expiresAtMillis = 0;
+      if (expiresAt instanceof Timestamp) {
+        expiresAtMillis = expiresAt.toMillis();
+      } else if (typeof expiresAt === 'number') {
+        expiresAtMillis = expiresAt;
+      } else if (expiresAt?.toDate) {
+        expiresAtMillis = expiresAt.toDate().getTime();
       }
+
+      const dailyIdFromDoc = entry.dailyId || entry.id;
+      if (!entry.userId || !dailyIdFromDoc) {
+        return;
+      }
+
+      dailyLookup.set(entry.userId, {
+        dailyId: dailyIdFromDoc,
+        expiresAtMillis,
+        createdAt: entry.createdAt?.toMillis?.() ?? entry.createdAt ?? 0,
+      });
     });
 
-    const users: OnlineUser[] = dailyDataRef.current
-      .map((entry: any) => {
-        const expiresAt = entry.expiresAt;
-        let expiresAtMillis = 0;
-        if (expiresAt instanceof Timestamp) {
-          expiresAtMillis = expiresAt.toMillis();
-        } else if (typeof expiresAt === 'number') {
-          expiresAtMillis = expiresAt;
-        } else if (expiresAt?.toDate) {
-          expiresAtMillis = expiresAt.toDate().getTime();
-        }
+    const usersMap = new Map<string, OnlineUser>();
 
-        return {
-          userId: entry.userId,
-          dailyId: entry.dailyId,
-          createdAt: entry.createdAt?.toMillis?.() ?? entry.createdAt ?? Date.now(),
-          expiresAtMillis
-        };
-      })
-      .filter((entry) => {
-        return (
-          entry.userId &&
-          entry.userId !== currentUserId &&
-          entry.expiresAtMillis > now &&
-          onlineUserIds.has(entry.userId)
-        );
-      })
-      .map((entry) => ({
-        userId: entry.userId,
-        dailyId: entry.dailyId,
-        createdAt: entry.createdAt,
-        isActive: true
-      }));
+    presenceDataRef.current.forEach((entry: any) => {
+      const userId = entry.userId;
+      if (!userId || userId === currentUserId) {
+        return;
+      }
 
-    users.sort((a, b) => b.createdAt - a.createdAt);
+      const lastSeenValue = typeof entry.lastSeenMillis === 'number'
+        ? entry.lastSeenMillis
+        : entry.lastSeen?.toMillis
+          ? entry.lastSeen.toMillis()
+          : entry.lastSeen?.toDate
+            ? entry.lastSeen.toDate().getTime()
+            : entry.updatedAt?.toMillis
+              ? entry.updatedAt.toMillis()
+              : entry.updatedAt?.toDate
+                ? entry.updatedAt.toDate().getTime()
+                : 0;
+
+      if (!lastSeenValue || now - lastSeenValue >= STALE_THRESHOLD) {
+        return;
+      }
+
+      const lookup = dailyLookup.get(userId);
+      let dailyId = entry.dailyId || lookup?.dailyId;
+      let expiresAtMillis = entry.expiresAtMillis || lookup?.expiresAtMillis || 0;
+      const createdAt = lookup?.createdAt || lastSeenValue;
+
+      if (!dailyId) {
+        return;
+      }
+
+      if (expiresAtMillis && expiresAtMillis <= now) {
+        return;
+      }
+
+      usersMap.set(userId, {
+        userId,
+        dailyId,
+        createdAt,
+        isActive: true,
+      });
+    });
+
+    const users = Array.from(usersMap.values()).sort((a, b) => b.createdAt - a.createdAt);
 
     setOnlineUsers(users);
     setLoading(false);
@@ -117,7 +136,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
 
   // Mark user as online with heartbeat
   useEffect(() => {
-    if (!currentUserId) return;
+    if (!currentUserId || !currentDailyId) return;
 
     const presenceRef = doc(db, 'presence', currentUserId);
     let heartbeatInterval: NodeJS.Timeout;
@@ -131,7 +150,10 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
             userId: currentUserId,
             isOnline: true,
             lastSeen: serverTimestamp(),
-            updatedAt: serverTimestamp()
+            lastSeenMillis: Date.now(),
+            updatedAt: serverTimestamp(),
+            dailyId: currentDailyId,
+            expiresAtMillis: getNextMidnight().getTime()
           },
           { merge: true }
         );
@@ -162,9 +184,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        markOffline();
-      } else {
+      if (!document.hidden) {
         markOnline();
         // Restart heartbeat if tab becomes visible again
         clearInterval(heartbeatInterval);
@@ -181,7 +201,7 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [currentUserId]);
+  }, [currentUserId, currentDailyId]);
 
   // Real-time listeners for presence and active IDs
   useEffect(() => {

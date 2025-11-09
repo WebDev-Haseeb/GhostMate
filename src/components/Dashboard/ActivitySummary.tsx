@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import type { Connection } from '@/types/favorites';
 import styles from './ActivitySummary.module.css';
 
 interface ActivitySummaryProps {
@@ -41,36 +42,19 @@ export default function ActivitySummary({
         setHighlightsGiven(highlightsSnapshot.size);
 
         // Get active connections (mutual favorites that haven't expired)
-        const nowMillis = Date.now();
         const connectionsRef = collection(db, 'connections');
-
         const connectionsSnapshot = await getDocs(
-          query(connectionsRef, where('user1', '==', userId))
-        );
-        const connectionsSnapshot2 = await getDocs(
-          query(connectionsRef, where('user2', '==', userId))
+          query(connectionsRef, where('userIds', 'array-contains', userId))
         );
 
-        const countActive = (docs: typeof connectionsSnapshot.docs) =>
-          docs.reduce((count, docSnap) => {
-            const data = docSnap.data();
-            const expiresAt = data?.expiresAt;
-            let expiryMillis = 0;
+        const activeCount = connectionsSnapshot.docs.reduce((total, docSnap) => {
+          const data = docSnap.data() as Connection | undefined;
+          if (!data) return total;
+          if (data.status !== 'active') return total;
+          return total + 1;
+        }, 0);
 
-            if (expiresAt instanceof Timestamp) {
-              expiryMillis = expiresAt.toMillis();
-            } else if (typeof expiresAt === 'number') {
-              expiryMillis = expiresAt;
-            } else if (expiresAt?.toDate) {
-              expiryMillis = expiresAt.toDate().getTime();
-            }
-
-            return expiryMillis > nowMillis ? count + 1 : count;
-          }, 0);
-
-        setActiveConnections(
-          countActive(connectionsSnapshot.docs) + countActive(connectionsSnapshot2.docs)
-        );
+        setActiveConnections(activeCount);
 
         // Get user's current streak
         const usersRef = collection(db, 'users');

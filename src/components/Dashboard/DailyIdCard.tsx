@@ -35,7 +35,7 @@ export default function DailyIdCard({ dailyId, loading, error }: DailyIdCardProp
 My Daily ID: ${formatDailyId(dailyId)}
 
 Connect with me at:
-https://ghostmate.online
+https://ghostmate.online/chat/${dailyId}
 
 🔒 Anonymous • 💬 Ephemeral • 🌙 Resets daily`;
 

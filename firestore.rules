@@ -52,8 +52,14 @@ service cloud.firestore {
     
     // Connections - users can read connections they're part of
     match /connections/{connectionId} {
-      allow read: if (isSignedIn() && connectionId.matches('.*' + request.auth.uid + '.*')) || isAdmin();
-      allow write: if (isSignedIn() && connectionId.matches('.*' + request.auth.uid + '.*')) || isAdmin();
+      allow read: if (
+        (isSignedIn() && resource.data.userIds != null && resource.data.userIds.hasAny([request.auth.uid])) ||
+        isAdmin()
+      );
+      allow write: if (
+        (isSignedIn() && request.resource.data.userIds != null && request.resource.data.userIds.hasAny([request.auth.uid])) ||
+        isAdmin()
+      );
     }
     
     // Daily Connection Checks - users can read/write checks they're part of
