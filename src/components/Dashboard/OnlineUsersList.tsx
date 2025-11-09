@@ -414,39 +414,43 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
           </div>
         ) : (
           <div className={styles.userGrid}>
-            {onlineUsers.map((user) => (
-              <button
-                key={user.dailyId}
-                onClick={() => handleConnect(user.dailyId)}
-                disabled={(chatLimit.isLimitReached && !user.isSupportAgent) || connectingTo === user.dailyId}
-                className={`${styles.userCard} ${connectingTo === user.dailyId ? styles.connecting : ''}`}
-              >
-                {(user.unreadCount ?? 0) > 0 && (
-                  <span className={styles.unreadBadge}>
-                    {user.unreadCount > 3 ? '3+' : user.unreadCount}
-                  </span>
-                )}
-                <div className={styles.userIcon}>
-                  <img src="/favicon.svg" alt="" style={{ width: '2.5rem', height: '2.5rem', opacity: 0.5 }} />
-                </div>
-                <span className={styles.userId}>
-                  {user.displayName ?? formatDailyId(user.dailyId)}
-                </span>
-                <div className={styles.userStatus}>
-                  {connectingTo === user.dailyId ? (
-                    <>
-                      <span className={styles.connectingDot}>⏳</span>
-                      <span>Connecting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className={styles.onlineDot}></span>
-                      <span>{user.isSupportAgent ? 'Support' : 'Online'}</span>
-                    </>
+            {onlineUsers.map((user) => {
+              const unreadCount = user.unreadCount ?? 0;
+
+              return (
+                <button
+                  key={user.dailyId}
+                  onClick={() => handleConnect(user.dailyId)}
+                  disabled={(chatLimit.isLimitReached && !user.isSupportAgent) || connectingTo === user.dailyId}
+                  className={`${styles.userCard} ${connectingTo === user.dailyId ? styles.connecting : ''}`}
+                >
+                  {unreadCount > 0 && (
+                    <span className={styles.unreadBadge}>
+                      {unreadCount > 3 ? '3+' : unreadCount}
+                    </span>
                   )}
-                </div>
-              </button>
-            ))}
+                  <div className={styles.userIcon}>
+                    <img src="/favicon.svg" alt="" style={{ width: '2.5rem', height: '2.5rem', opacity: 0.5 }} />
+                  </div>
+                  <span className={styles.userId}>
+                    {user.displayName ?? formatDailyId(user.dailyId)}
+                  </span>
+                  <div className={styles.userStatus}>
+                    {connectingTo === user.dailyId ? (
+                      <>
+                        <span className={styles.connectingDot}>⏳</span>
+                        <span>Connecting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className={styles.onlineDot}></span>
+                        <span>{user.isSupportAgent ? 'Support' : 'Online'}</span>
+                      </>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
