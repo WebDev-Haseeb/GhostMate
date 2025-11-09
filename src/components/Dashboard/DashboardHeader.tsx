@@ -14,15 +14,28 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ timeUntilReset, onSignOut }: DashboardHeaderProps) {
   const router = useRouter();
+  const handleBrandClick = () => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/') {
+      window.location.reload();
+      return;
+    }
+
+    router.push('/');
+  };
 
   return (
     <header className={styles.header}>
       <div className={styles.container}>
         {/* Logo/Brand */}
-        <div className={styles.brand}>
+        <button
+          type="button"
+          className={styles.brand}
+          onClick={handleBrandClick}
+          aria-label="Reload dashboard"
+        >
           <img src="/favicon.svg" alt="GhostMate" className={styles.logo} />
           <h1 className={styles.title}>GhostMate</h1>
-        </div>
+        </button>
 
         {/* Countdown Timer */}
         {timeUntilReset && (

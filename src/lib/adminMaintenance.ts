@@ -100,21 +100,24 @@ export async function deleteAllChats(): Promise<DeleteChatsResult> {
   const chatsRef = ref(database, 'chats');
   const snapshot = await get(chatsRef);
 
-  if (!snapshot.exists()) {
-    return { deletedChats: 0, deletedMessages: 0 };
+  let deletedChats = 0;
+  let deletedMessages = 0;
+
+  if (snapshot.exists()) {
+    const chatsData = snapshot.val() as Record<string, any>;
+    deletedChats = Object.keys(chatsData).length;
+
+    Object.values(chatsData).forEach((chat: any) => {
+      if (chat && typeof chat === 'object' && chat.messages) {
+        deletedMessages += Object.keys(chat.messages).length;
+      }
+    });
   }
 
-  const chatsData = snapshot.val() as Record<string, any>;
-  const deletedChats = Object.keys(chatsData).length;
-
-  let deletedMessages = 0;
-  Object.values(chatsData).forEach((chat: any) => {
-    if (chat && typeof chat === 'object' && chat.messages) {
-      deletedMessages += Object.keys(chat.messages).length;
-    }
-  });
-
-  await set(chatsRef, null);
+  await Promise.all([
+    set(chatsRef, null),
+    set(ref(database, 'userUnread'), null)
+  ]);
 
   return { deletedChats, deletedMessages };
 }
@@ -189,6 +192,7 @@ export async function deleteAllAppData(): Promise<DeleteAllDataResult> {
     'userFavorites',
     'connections',
     'dailyConnectionChecks',
+    'presence',
     'queuedStories',
     'approvedStories'
   ];
