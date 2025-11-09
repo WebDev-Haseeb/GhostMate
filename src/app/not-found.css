@@ -1,4 +1,4 @@
-.wrapper {
+.nf-wrapper {
   position: relative;
   min-height: 100vh;
   padding: clamp(var(--space-xl), 8vw, var(--space-2xl));
@@ -11,7 +11,7 @@
     var(--background-primary);
 }
 
-.ambient {
+.nf-ambient {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -22,10 +22,10 @@
     radial-gradient(18rem 18rem at 80% 60%, rgba(255, 140, 0, 0.2), transparent),
     radial-gradient(14rem 16rem at 50% 90%, rgba(0, 191, 255, 0.18), transparent);
   filter: blur(18px);
-  animation: ambientDrift 14s ease-in-out infinite alternate;
+  animation: nfAmbientDrift 14s ease-in-out infinite alternate;
 }
 
-@keyframes ambientDrift {
+@keyframes nfAmbientDrift {
   0% {
     transform: translate3d(-2%, 2%, 0) scale(1);
   }
@@ -35,7 +35,7 @@
   }
 }
 
-.card {
+.nf-card {
   position: relative;
   width: min(680px, 100%);
   padding: clamp(var(--space-xl), 5vw, var(--space-2xl));
@@ -50,10 +50,10 @@
   display: flex;
   flex-direction: column;
   gap: clamp(var(--space-lg), 3vw, var(--space-xl));
-  animation: fadeUp 450ms ease 60ms both;
+  animation: nfFadeUp 450ms ease 60ms both;
 }
 
-@keyframes fadeUp {
+@keyframes nfFadeUp {
   from {
     opacity: 0;
     transform: translateY(12px);
@@ -65,7 +65,7 @@
   }
 }
 
-.badge {
+.nf-badge {
   align-self: center;
   display: inline-flex;
   align-items: center;
@@ -80,12 +80,12 @@
   color: var(--foreground-secondary);
 }
 
-.ghost {
+.nf-ghost {
   font-size: clamp(3rem, 10vw, 4.5rem);
-  animation: ghostBob 3.2s ease-in-out infinite;
+  animation: nfGhostBob 3.2s ease-in-out infinite;
 }
 
-@keyframes ghostBob {
+@keyframes nfGhostBob {
   0%, 100% {
     transform: translateY(-4px);
   }
@@ -95,52 +95,52 @@
   }
 }
 
-.title {
+.nf-title {
   font-size: clamp(2rem, 6vw, 3rem);
   margin: 0;
 }
 
-.subtitle {
+.nf-subtitle {
   max-width: 38ch;
   margin: 0 auto;
   color: var(--foreground-secondary);
   font-size: clamp(1rem, 2.8vw, 1.1rem);
 }
 
-.grid {
+.nf-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-md);
   text-align: left;
 }
 
-.insight {
+.nf-insight {
   padding: var(--space-md);
   border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(123, 104, 238, 0.12);
 }
 
-.insight h3 {
+.nf-insight h3 {
   font-size: 1.05rem;
   margin-bottom: var(--space-sm);
 }
 
-.insight p {
+.nf-insight p {
   margin: 0;
   color: var(--foreground-secondary);
   font-size: 0.95rem;
 }
 
-.actions {
+.nf-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-md);
 }
 
-.primaryAction,
-.secondaryAction {
+.nf-primaryAction,
+.nf-secondaryAction {
   position: relative;
   padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-lg);
@@ -155,79 +155,79 @@
   will-change: box-shadow;
 }
 
-.primaryAction {
+.nf-primaryAction {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: #ffffff;
   box-shadow: 0 12px 24px rgba(123, 104, 238, 0.35);
 }
 
-.primaryAction:hover,
-.primaryAction:focus-visible {
+.nf-primaryAction:hover,
+.nf-primaryAction:focus-visible {
   color: #ffffff;
   box-shadow: 0 18px 34px rgba(123, 104, 238, 0.5);
 }
 
-.secondaryAction {
+.nf-secondaryAction {
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--foreground-primary);
   background: rgba(255, 255, 255, 0.04);
   box-shadow: 0 8px 18px rgba(10, 10, 15, 0.3);
 }
 
-.secondaryAction:hover,
-.secondaryAction:focus-visible {
+.nf-secondaryAction:hover,
+.nf-secondaryAction:focus-visible {
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 10px 22px rgba(10, 10, 15, 0.36);
 }
 
-.meta {
+.nf-meta {
   font-size: 0.95rem;
   color: var(--foreground-secondary);
 }
 
-.meta a {
+.nf-meta a {
   color: var(--accent-secondary);
   font-weight: 600;
 }
 
-.meta a:hover {
+.nf-meta a:hover {
   color: #ffffff;
 }
 
 @media (max-width: 768px) {
-  .wrapper {
+  .nf-wrapper {
     padding: var(--space-xl) var(--space-md);
   }
 
-  .card {
+  .nf-card {
     padding: clamp(var(--space-lg), 6vw, var(--space-xl));
   }
 
-  .grid {
+  .nf-grid {
     grid-template-columns: 1fr;
     gap: var(--space-sm);
   }
 
-  .primaryAction,
-  .secondaryAction {
+  .nf-primaryAction,
+  .nf-secondaryAction {
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .wrapper {
+  .nf-wrapper {
     padding: var(--space-lg) var(--space-sm);
   }
 
-  .card {
+  .nf-card {
     gap: var(--space-lg);
   }
 
-  .subtitle {
+  .nf-subtitle {
     font-size: 1rem;
   }
 
-  .insight {
+  .nf-insight {
     padding: var(--space-sm) var(--space-md);
   }
 }

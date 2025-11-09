@@ -195,7 +195,7 @@
   .container {
     padding: var(--space-sm) var(--space-md);
     gap: var(--space-sm);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* grid-template-columns: repeat(2, minmax(0, 1fr)); */
     grid-template-areas:
       "brand nav"
       "countdown countdown";
@@ -246,7 +246,7 @@
   .container {
     padding: var(--space-sm);
     gap: var(--space-xs);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* grid-template-columns: repeat(2, minmax(0, 1fr)); */
     grid-template-areas:
       "brand nav"
       "countdown countdown";

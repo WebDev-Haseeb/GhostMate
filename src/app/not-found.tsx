@@ -1,30 +1,30 @@
 import Link from "next/link";
-import styles from "./not-found.module.css";
+import "./not-found.css";
 
 export default function NotFound() {
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.ambient} aria-hidden />
-      <main className={styles.card}>
-        <span className={styles.badge}>Error 404 · Off the map</span>
-        <div className={styles.ghost} aria-hidden>
+    <div className="nf-wrapper">
+      <div className="nf-ambient" aria-hidden />
+      <main className="nf-card">
+        <span className="nf-badge">Error 404 · Off the map</span>
+        <div className="nf-ghost" aria-hidden>
           👻
         </div>
-        <h1 className={styles.title}>This room vanished with the sunrise</h1>
-        <p className={styles.subtitle}>
+        <h1 className="nf-title">This room vanished with the sunrise</h1>
+        <p className="nf-subtitle">
           The link you followed dissolved with yesterday&apos;s connections. Let&apos;s
           guide you back to a living conversation or start fresh with a new match.
         </p>
 
-        <section className={styles.grid}>
-          <article className={styles.insight}>
+        <section className="nf-grid">
+          <article className="nf-insight">
             <h3>Reconnect instantly</h3>
             <p>
               Head to your dashboard to pick up where you left off, explore new
               daily IDs, and see who&apos;s online right now.
             </p>
           </article>
-          <article className={styles.insight}>
+          <article className="nf-insight">
             <h3>Peek community stories</h3>
             <p>
               Browse featured stories to feel the vibe, discover highlights, and get
@@ -33,16 +33,16 @@ export default function NotFound() {
           </article>
         </section>
 
-        <div className={styles.actions}>
-          <Link href="/" className={styles.primaryAction}>
+        <div className="nf-actions">
+          <Link href="/" className="nf-primaryAction">
             Return to dashboard
           </Link>
-          <Link href="/stories" className={styles.secondaryAction}>
+          <Link href="/stories" className="nf-secondaryAction">
             Explore stories
           </Link>
         </div>
 
-        <p className={styles.meta}>
+        <p className="nf-meta">
           Still lost? Review our{" "}
           <Link href="/privacy" prefetch={false}>
             Privacy Policy
