@@ -7,7 +7,7 @@
  * Only accessible with valid admin session.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -25,7 +25,7 @@ import { ref, onValue } from 'firebase/database';
 import { Chat, Message } from '@/types/chat';
 import { listenToMessages, sendMessage as sendChatMessage } from '@/lib/chatService';
 import { ADMIN_SUPPORT_DAILY_ID, ADMIN_SUPPORT_DISPLAY_NAME } from '@/config/adminSupport';
-import { formatDailyId } from '@/lib/dailyId';
+import { formatDailyId, getTodayDateString } from '@/lib/dailyId';
 
 interface SupportChatSummary {
   chatId: string;
@@ -52,6 +52,8 @@ export default function TrueAdminPanel() {
   const [supportInput, setSupportInput] = useState('');
   const [supportSending, setSupportSending] = useState(false);
   const [supportError, setSupportError] = useState<string | null>(null);
+  const lastCleanupDateRef = useRef<string>(getTodayDateString());
+  const autoCleanupInFlightRef = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -85,6 +87,43 @@ export default function TrueAdminPanel() {
     };
 
     fetchStories();
+  }, [isAdmin]);
+
+  useEffect(() => {
+    lastCleanupDateRef.current = getTodayDateString();
+
+    if (!isAdmin) {
+      return;
+    }
+
+    const runCleanupIfNeeded = async () => {
+      const todayKey = getTodayDateString();
+      if (todayKey === lastCleanupDateRef.current || autoCleanupInFlightRef.current) {
+        return;
+      }
+
+      autoCleanupInFlightRef.current = true;
+      try {
+        const result = await deleteExpiredChats();
+
+        if (result.deletedChats > 0 || result.deletedMessages > 0) {
+          setSuccessMessage(
+            `🌙 Midnight cleanup removed ${result.deletedChats} chats (${result.deletedMessages} messages).`
+          );
+        }
+      } catch (err: any) {
+        console.error('Automatic midnight cleanup failed:', err);
+        setError(err?.message || 'Automatic midnight cleanup failed.');
+      } finally {
+        lastCleanupDateRef.current = todayKey;
+        autoCleanupInFlightRef.current = false;
+      }
+    };
+
+    const interval = window.setInterval(runCleanupIfNeeded, 60_000);
+    runCleanupIfNeeded();
+
+    return () => window.clearInterval(interval);
   }, [isAdmin]);
 
   const handleApprove = async (storyId: string) => {
