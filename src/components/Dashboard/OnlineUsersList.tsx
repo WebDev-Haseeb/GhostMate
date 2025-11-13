@@ -17,6 +17,8 @@ import {
   isAdminSupportDailyId,
 } from '@/config/adminSupport';
 import { ref as realtimeRef, onValue } from 'firebase/database';
+import { getUserFavorites } from '@/lib/favoritesService';
+import { getUserIdFromDailyId } from '@/lib/dailyIdService';
 
 interface OnlineUser {
   userId: string;
@@ -174,43 +176,54 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
     setLoading(false);
   }, [currentUserId, currentDailyId]);
 
-  // Fetch user's connections
+  // Fetch users with mutual favorites (Last Connections)
   useEffect(() => {
-    if (!currentUserId) {
+    if (!currentUserId || !currentDailyId) {
       setConnectionUserIds(new Set());
       return;
     }
 
-    const fetchConnections = async () => {
+    const fetchMutualFavorites = async () => {
       try {
-        const connectionsRef = collection(db, 'connections');
-        const connectionsQuery = query(
-          connectionsRef,
-          where('userIds', 'array-contains', currentUserId)
-        );
-        const snapshot = await getDocs(connectionsQuery);
-        
-        const connectedUserIds = new Set<string>();
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.userIds && Array.isArray(data.userIds)) {
-            data.userIds.forEach((uid: string) => {
-              if (uid !== currentUserId) {
-                connectedUserIds.add(uid);
-              }
-            });
+        // Get current user's favorites
+        const myFavorites = await getUserFavorites(currentUserId);
+        if (!myFavorites || !myFavorites.favorites) {
+          setConnectionUserIds(new Set());
+          return;
+        }
+
+        const mutualFavoriteUserIds = new Set<string>();
+
+        // Check each favorited daily ID for mutual favorite
+        for (const [favoritedDailyId] of Object.entries(myFavorites.favorites)) {
+          try {
+            // Get the user ID from the favorited daily ID
+            const otherUserId = await getUserIdFromDailyId(favoritedDailyId);
+            if (!otherUserId || otherUserId === currentUserId) {
+              continue;
+            }
+
+            // Check if the other user has also favorited our current daily ID
+            const otherFavorites = await getUserFavorites(otherUserId);
+            if (otherFavorites?.favorites?.[currentDailyId]) {
+              // Mutual favorite detected!
+              mutualFavoriteUserIds.add(otherUserId);
+            }
+          } catch (error) {
+            // Skip if we can't get user ID or favorites (daily ID might be expired)
+            continue;
           }
-        });
-        
-        setConnectionUserIds(connectedUserIds);
+        }
+
+        setConnectionUserIds(mutualFavoriteUserIds);
       } catch (error) {
-        console.error('Error fetching connections:', error);
+        console.error('Error fetching mutual favorites:', error);
         setConnectionUserIds(new Set());
       }
     };
 
-    fetchConnections();
-  }, [currentUserId]);
+    fetchMutualFavorites();
+  }, [currentUserId, currentDailyId]);
 
   // Real-time listeners for presence and active IDs
   useEffect(() => {

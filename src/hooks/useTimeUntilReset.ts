@@ -1,32 +1,32 @@
 import { useState, useEffect } from 'react';
+import { getTimeUntilMidnight } from '@/lib/dailyId';
 
-export function useTimeUntilReset(): string {
-  const [timeUntilReset, setTimeUntilReset] = useState<string>('');
+export interface TimeUntilReset {
+  hours: number;
+  minutes: number;
+  seconds: number;
+  totalMs: number;
+}
+
+export function useTimeUntilReset(): TimeUntilReset | null {
+  const [timeUntilReset, setTimeUntilReset] = useState<TimeUntilReset | null>(null);
 
   useEffect(() => {
     const updateTime = () => {
-      // Pakistan timezone (PKT) is UTC+5
-      const now = new Date();
-      const pktOffset = 5 * 60; // minutes
-      const localOffset = now.getTimezoneOffset(); // minutes from UTC
-      
-      // Convert to PKT
-      const pktTime = new Date(now.getTime() + (pktOffset + localOffset) * 60000);
-      
-      // Calculate time until midnight PKT
-      const midnight = new Date(pktTime);
-      midnight.setHours(24, 0, 0, 0);
-      
-      const diff = midnight.getTime() - pktTime.getTime();
-      
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      
-      setTimeUntilReset(`${hours}h ${minutes}m`);
+      const time = getTimeUntilMidnight();
+      setTimeUntilReset({
+        hours: time.hours,
+        minutes: time.minutes,
+        seconds: time.seconds,
+        totalMs: time.totalMs
+      });
     };
 
+    // Update immediately
     updateTime();
-    const interval = setInterval(updateTime, 60000); // Update every minute
+    
+    // Update every second
+    const interval = setInterval(updateTime, 1000);
     
     return () => clearInterval(interval);
   }, []);

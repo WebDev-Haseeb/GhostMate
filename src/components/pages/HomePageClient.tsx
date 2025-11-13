@@ -55,6 +55,16 @@ export default function HomePageClient() {
     }
   }, [user, authLoading, router]);
 
+  // Auto-refresh/redirect when reset time hits
+  useEffect(() => {
+    if (!timeUntilReset) return;
+
+    // If less than 1 second until midnight (all time units are 0), refresh the page to get new daily ID
+    if (timeUntilReset.hours === 0 && timeUntilReset.minutes === 0 && timeUntilReset.seconds === 0) {
+      window.location.href = '/';
+    }
+  }, [timeUntilReset]);
+
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === 'R') {

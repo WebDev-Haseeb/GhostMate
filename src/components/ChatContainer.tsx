@@ -28,6 +28,16 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
   const { dailyId, loading: idLoading } = useDailyId(user?.uid || null);
   const timeUntilReset = useTimeUntilReset();
   const isSupportChat = isAdminSupportDailyId(otherDailyId);
+
+  // Auto-redirect to dashboard when reset time hits
+  useEffect(() => {
+    if (!timeUntilReset) return;
+
+    // If less than 1 second until midnight, redirect to dashboard
+    if (timeUntilReset.totalMs < 1000) {
+      router.push('/');
+    }
+  }, [timeUntilReset, router]);
   const { 
     messages, 
     loading: chatLoading, 
@@ -272,10 +282,16 @@ export default function ChatContainer({ otherDailyId }: ChatContainerProps) {
         </div>
       </header>
 
-      <div className={styles.resetBar}>
-        <span className={styles.resetLabel}>Resets in</span>
-        <span className={styles.resetValue}>🕐 {timeUntilReset}</span>
-      </div>
+      {timeUntilReset && (
+        <div className={styles.resetBar}>
+          <span className={styles.resetLabel}>Resets in</span>
+          <span className={styles.resetValue}>
+            🕐 {String(timeUntilReset.hours).padStart(2, '0')}:
+            {String(timeUntilReset.minutes).padStart(2, '0')}:
+            {String(timeUntilReset.seconds).padStart(2, '0')}
+          </span>
+        </div>
+      )}
 
       {/* Removed PurgeWarning - reset time now in header */}
 
