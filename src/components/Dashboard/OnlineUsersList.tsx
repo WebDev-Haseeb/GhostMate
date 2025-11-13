@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, Timestamp, onSnapshot } from 'firebase/firestore';
+import { collection, Timestamp, onSnapshot, query, where, getDocs } from 'firebase/firestore';
 import { db, database } from '@/lib/firebase';
 import { formatDailyId } from '@/lib/dailyId';
 import { getChat } from '@/lib/chatService';
@@ -43,6 +43,7 @@ interface OnlineUsersListProps {
 export default function OnlineUsersList({ currentUserId, currentDailyId, chatLimit }: OnlineUsersListProps) {
   const router = useRouter();
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [connectionUserIds, setConnectionUserIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [connectingTo, setConnectingTo] = useState<string | null>(null);
   const [randomConnecting, setRandomConnecting] = useState(false);
@@ -172,6 +173,44 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
     setOnlineUsers(users);
     setLoading(false);
   }, [currentUserId, currentDailyId]);
+
+  // Fetch user's connections
+  useEffect(() => {
+    if (!currentUserId) {
+      setConnectionUserIds(new Set());
+      return;
+    }
+
+    const fetchConnections = async () => {
+      try {
+        const connectionsRef = collection(db, 'connections');
+        const connectionsQuery = query(
+          connectionsRef,
+          where('userIds', 'array-contains', currentUserId)
+        );
+        const snapshot = await getDocs(connectionsQuery);
+        
+        const connectedUserIds = new Set<string>();
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.userIds && Array.isArray(data.userIds)) {
+            data.userIds.forEach((uid: string) => {
+              if (uid !== currentUserId) {
+                connectedUserIds.add(uid);
+              }
+            });
+          }
+        });
+        
+        setConnectionUserIds(connectedUserIds);
+      } catch (error) {
+        console.error('Error fetching connections:', error);
+        setConnectionUserIds(new Set());
+      }
+    };
+
+    fetchConnections();
+  }, [currentUserId]);
 
   // Real-time listeners for presence and active IDs
   useEffect(() => {
@@ -406,52 +445,122 @@ export default function OnlineUsersList({ currentUserId, currentDailyId, chatLim
             </div>
             <p>Finding online users...</p>
           </div>
-        ) : onlineUsers.length === 0 ? (
-          <div className={styles.emptyState}>
-            <span className={styles.emptyIcon}>😔</span>
-            <p className={styles.emptyTitle}>No users online</p>
-            <p className={styles.emptySubtitle}>Share your ID to invite friends!</p>
-          </div>
         ) : (
-          <div className={styles.userGrid}>
-            {onlineUsers.map((user) => {
-              const unreadCount = user.unreadCount ?? 0;
+          <>
+            {/* Last Connections Section */}
+            {connectionUserIds.size > 0 && (
+              <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Last Connections</h3>
+                <div className={styles.userGrid}>
+                  {onlineUsers
+                    .filter((user) => connectionUserIds.has(user.userId))
+                    .map((user) => {
+                      const unreadCount = user.unreadCount ?? 0;
+                      return (
+                        <button
+                          key={user.dailyId}
+                          onClick={() => handleConnect(user.dailyId)}
+                          disabled={(chatLimit.isLimitReached && !user.isSupportAgent) || connectingTo === user.dailyId}
+                          className={`${styles.userCard} ${connectingTo === user.dailyId ? styles.connecting : ''}`}
+                        >
+                          {unreadCount > 0 && (
+                            <span className={styles.unreadBadge}>
+                              {unreadCount > 3 ? '3+' : unreadCount}
+                            </span>
+                          )}
+                          <div className={styles.userIcon}>
+                            <img src="/favicon.svg" alt="" style={{ width: '2.5rem', height: '2.5rem', opacity: 0.5 }} />
+                          </div>
+                          <span className={styles.userId}>
+                            {user.displayName ?? formatDailyId(user.dailyId)}
+                          </span>
+                          <div className={styles.userStatus}>
+                            {connectingTo === user.dailyId ? (
+                              <>
+                                <span className={styles.connectingDot}>⏳</span>
+                                <span>Connecting...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className={styles.onlineDot}></span>
+                                <span>{user.isSupportAgent ? 'Support' : 'Online'}</span>
+                              </>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+                {onlineUsers.filter((user) => connectionUserIds.has(user.userId)).length === 0 && (
+                  <div className={styles.emptyState}>
+                    <span className={styles.emptyIcon}>💫</span>
+                    <p className={styles.emptyTitle}>No connections online</p>
+                    <p className={styles.emptySubtitle}>Your connections will appear here when they're online</p>
+                  </div>
+                )}
+              </div>
+            )}
 
-              return (
-                <button
-                  key={user.dailyId}
-                  onClick={() => handleConnect(user.dailyId)}
-                  disabled={(chatLimit.isLimitReached && !user.isSupportAgent) || connectingTo === user.dailyId}
-                  className={`${styles.userCard} ${connectingTo === user.dailyId ? styles.connecting : ''}`}
-                >
-                  {unreadCount > 0 && (
-                    <span className={styles.unreadBadge}>
-                      {unreadCount > 3 ? '3+' : unreadCount}
-                    </span>
-                  )}
-                  <div className={styles.userIcon}>
-                    <img src="/favicon.svg" alt="" style={{ width: '2.5rem', height: '2.5rem', opacity: 0.5 }} />
-                  </div>
-                  <span className={styles.userId}>
-                    {user.displayName ?? formatDailyId(user.dailyId)}
-                  </span>
-                  <div className={styles.userStatus}>
-                    {connectingTo === user.dailyId ? (
-                      <>
-                        <span className={styles.connectingDot}>⏳</span>
-                        <span>Connecting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className={styles.onlineDot}></span>
-                        <span>{user.isSupportAgent ? 'Support' : 'Online'}</span>
-                      </>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+            {/* All Online Users Section */}
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>All Online Users</h3>
+              {onlineUsers.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <span className={styles.emptyIcon}>😔</span>
+                  <p className={styles.emptyTitle}>No users online</p>
+                  <p className={styles.emptySubtitle}>Share your ID to invite friends!</p>
+                </div>
+              ) : (
+                <div className={styles.userGrid}>
+                  {onlineUsers
+                    .filter((user) => !connectionUserIds.has(user.userId))
+                    .map((user) => {
+                      const unreadCount = user.unreadCount ?? 0;
+                      return (
+                        <button
+                          key={user.dailyId}
+                          onClick={() => handleConnect(user.dailyId)}
+                          disabled={(chatLimit.isLimitReached && !user.isSupportAgent) || connectingTo === user.dailyId}
+                          className={`${styles.userCard} ${connectingTo === user.dailyId ? styles.connecting : ''}`}
+                        >
+                          {unreadCount > 0 && (
+                            <span className={styles.unreadBadge}>
+                              {unreadCount > 3 ? '3+' : unreadCount}
+                            </span>
+                          )}
+                          <div className={styles.userIcon}>
+                            <img src="/favicon.svg" alt="" style={{ width: '2.5rem', height: '2.5rem', opacity: 0.5 }} />
+                          </div>
+                          <span className={styles.userId}>
+                            {user.displayName ?? formatDailyId(user.dailyId)}
+                          </span>
+                          <div className={styles.userStatus}>
+                            {connectingTo === user.dailyId ? (
+                              <>
+                                <span className={styles.connectingDot}>⏳</span>
+                                <span>Connecting...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className={styles.onlineDot}></span>
+                                <span>{user.isSupportAgent ? 'Support' : 'Online'}</span>
+                              </>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+              {onlineUsers.length > 0 && onlineUsers.filter((user) => !connectionUserIds.has(user.userId)).length === 0 && (
+                <div className={styles.emptyState}>
+                  <span className={styles.emptyIcon}>✨</span>
+                  <p className={styles.emptyTitle}>All your connections are online!</p>
+                  <p className={styles.emptySubtitle}>Check the Last Connections section above</p>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>

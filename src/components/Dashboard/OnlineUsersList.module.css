@@ -172,6 +172,26 @@
   overflow-x: hidden;
   padding: var(--space-lg);
   min-height: 0; /* Important for flexbox scrolling */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* Section */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--foreground-primary);
+  margin: 0;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid rgba(123, 104, 238, 0.2);
 }
 
 /* Custom scrollbar for this container */
